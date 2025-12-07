@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { RouterLink } from 'vue-router'
+
 const utilityLinks = [
   { label: 'Quảng Cáo', href: '#' },
   { label: 'Gửi Bài', href: '#' },
@@ -12,11 +14,13 @@ const socialLinks = [
 ]
 
 const siteNavLinks = [
-  { label: 'Trang Chủ', href: '#top' },
-  { label: 'Thông Báo', href: '#section-3' },
-  { label: 'Tin Tức', href: '#section-1' },
-  { label: 'Sự Kiện', href: '#section-2' },
-  { label: 'Workshop', href: '#workshop' },
+  { label: 'Trang Chủ', to: '/' },
+  { label: 'Đào tạo', to: '/dao-tao' },
+  { label: 'Sinh viên', to: '/sinh-vien' },
+  { label: 'Hoạt động khoa', to: '/hoat-dong-khoa' },
+  { label: 'Hợp tác - Kết nối', to: '/hop-tac-ket-noi' },
+  { label: 'Tin tức', to: '/tin-tuc' },
+  { label: 'Tạp chí kiến trúc', href: 'https://www.tapchikientruc.com.vn/' },
 ]
 
 const aboutCards = [
@@ -91,7 +95,14 @@ const activityCards = [
       </div>
 
       <nav class="site-nav">
-        <a v-for="link in siteNavLinks" :key="link.label" :href="link.href">{{ link.label }}</a>
+        <template v-for="link in siteNavLinks" :key="link.label">
+          <RouterLink v-if="link.to" :to="link.to">
+            {{ link.label }}
+          </RouterLink>
+          <a v-else :href="link.href" target="_blank" rel="noopener">
+            {{ link.label }}
+          </a>
+        </template>
       </nav>
     </header>
 
