@@ -1,6 +1,7 @@
 ﻿<script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import MasterLayout from '../components/MasterLayout.vue'
+import { RouterLink } from 'vue-router'
 import {
   fetchLatestYoutubeVideos,
   formatVideoDate,
@@ -10,10 +11,123 @@ import {
   getVideoUrl,
   type YoutubeVideo,
 } from '../services/youtubeService'
+import {
+  fetchLatestPosts,
+  getPostCategory,
+  getPostExcerpt,
+  getPostDate,
+  getPostShortDescription,
+  getPostImage,
+  fetchLatestPostsByCategory,
+  type Post,
+} from '../services/postsService'
+import {
+  fetchEvents,
+  formatEventDateRange,
+  getEventSubtitle,
+  getEventTitle,
+  formatEventTimeRange,
+  type EventItem,
+} from '../services/eventsService'
+import { fetchSandboxByCategory, fetchSandboxLatest, type SandboxPost } from '../services/sandboxService'
+
+const latestPosts = ref<Post[]>([])
+const isLatestLoading = ref(true)
+const latestError = ref('')
+
+const events = ref<EventItem[]>([])
+const isEventsLoading = ref(true)
+const eventsError = ref('')
+const currentEventIndex = ref(0)
+
+const highlightPosts = ref<Post[]>([])
+const isHighlightLoading = ref(true)
+const highlightError = ref('')
+
+const announcementPosts = ref<Post[]>([])
+const isAnnouncementsLoading = ref(true)
+const announcementsError = ref('')
+
+const sandboxRowOne = ref<SandboxPost[]>([])
+const sandboxRowTwo = ref<SandboxPost[]>([])
+const isSandboxLoading = ref(true)
+const sandboxError = ref('')
+
+const referencePosts = ref<Post[]>([])
+const isReferenceLoading = ref(true)
+const referenceError = ref('')
 
 const youtubeVideos = ref<YoutubeVideo[]>([])
 const isVideosLoading = ref(true)
 const videoError = ref('')
+
+const loadLatestPosts = async () => {
+  isLatestLoading.value = true
+  latestError.value = ''
+  try {
+    latestPosts.value = await fetchLatestPosts(5)
+  } catch (error) {
+    latestError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải bài viết.'
+    latestPosts.value = []
+  } finally {
+    isLatestLoading.value = false
+  }
+}
+
+const loadHighlightPosts = async () => {
+  isHighlightLoading.value = true
+  highlightError.value = ''
+  try {
+    highlightPosts.value = await fetchLatestPostsByCategory('hoat-dong-khoa', 5)
+  } catch (error) {
+    highlightError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải tin nổi bật.'
+    highlightPosts.value = []
+  } finally {
+    isHighlightLoading.value = false
+  }
+}
+
+const loadAnnouncements = async () => {
+  isAnnouncementsLoading.value = true
+  announcementsError.value = ''
+  try {
+    announcementPosts.value = await fetchLatestPostsByCategory('thong-bao', 5)
+  } catch (error) {
+    announcementsError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thông báo.'
+    announcementPosts.value = []
+  } finally {
+    isAnnouncementsLoading.value = false
+  }
+}
+
+const loadSandboxPosts = async () => {
+  isSandboxLoading.value = true
+  sandboxError.value = ''
+  try {
+    const [rowOne, rowTwo] = await Promise.all([fetchSandboxLatest(), fetchSandboxByCategory(6)])
+    sandboxRowOne.value = rowOne
+    sandboxRowTwo.value = rowTwo
+  } catch (error) {
+    sandboxError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sandbox.'
+    sandboxRowOne.value = []
+    sandboxRowTwo.value = []
+  } finally {
+    isSandboxLoading.value = false
+  }
+}
+
+const loadReferencePosts = async () => {
+  isReferenceLoading.value = true
+  referenceError.value = ''
+  try {
+    referencePosts.value = await fetchLatestPostsByCategory('thu-vien-tham-khao', 6)
+  } catch (error) {
+    referenceError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thư viện.'
+    referencePosts.value = []
+  } finally {
+    isReferenceLoading.value = false
+  }
+}
 
 const loadYoutubeVideos = async () => {
   isVideosLoading.value = true
@@ -27,86 +141,100 @@ const loadYoutubeVideos = async () => {
   }
 }
 
-onMounted(loadYoutubeVideos)
-
-const sectionOneHero = {
-  title: 'LIXIL Experience Center – Không gian tôn vinh những sắc thái của nước',
-  category: 'Tin trong nước',
-  excerpt: 'Trung tâm trải nghiệm tương tác mang lại góc nhìn mới về vật liệu và giải pháp kiến trúc hiện đại.',
-  image: 'https://images.unsplash.com/photo-1505691723518-36a5ac3be353?auto=format&fit=crop&w=1200&q=80',
+const loadEvents = async () => {
+  isEventsLoading.value = true
+  eventsError.value = ''
+  try {
+    events.value = await fetchEvents(5)
+  } catch (error) {
+    eventsError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sự kiện.'
+    events.value = []
+  } finally {
+    isEventsLoading.value = false
+  }
 }
 
-const sectionOneLeftPosts = [
-  {
-    tag: 'Công nghệ - Vật liệu',
-    title: 'Thiết kế tham số: Ba quy tắc tạo nên mặt tiền độc đáo',
-    image: 'https://images.unsplash.com/photo-1464146072230-91cabc968266?auto=format&fit=crop&w=600&q=60',
-  },
-  {
-    tag: 'Nhà ở',
-    title: 'Zen Art Sky Villa mang vẻ đẹp tinh tế với phong cách Zen Art',
-    image: 'https://images.unsplash.com/photo-1448932223592-d1fc686e76ea?auto=format&fit=crop&w=600&q=60',
-  },
-]
+const autoSlideDelayMs = 5000
+let autoSlideTimer: ReturnType<typeof setInterval> | null = null
 
-const sectionOneRightPosts = [
-  {
-    tag: 'Nhà ở',
-    title: 'Terra Villa – Biệt thự lấy cảm hứng từ đất nung',
-    image: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=600&q=60',
-  },
-  {
-    tag: 'Nội thất',
-    title: 'Jo Garden Coffee – Quán cà phê với tầng thượng mở',
-    image: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=600&q=60',
-  },
-]
+const stopAutoSlide = () => {
+  if (autoSlideTimer) {
+    clearInterval(autoSlideTimer)
+    autoSlideTimer = null
+  }
+}
 
-const highlightNews = [
-  {
-    title: 'Khai mạc tuần lễ đồ án tốt nghiệp',
-    date: '12/05/2025',
-    excerpt: '35 đồ án tiêu biểu được sàng tuyển, tập trung vào các câu chuyện đô thị mới.',
-    image: 'https://images.unsplash.com/photo-1461988320302-91bde64fc8e4?auto=format&fit=crop&w=800&q=60',
-  },
-  {
-    title: 'Thành lập câu lạc bộ Studio Lab',
-    date: '06/05/2025',
-    excerpt: 'Không gian mở cho sinh viên nghiên cứu vật liệu, mô hình và chuyển giao công nghệ.',
-    image: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=800&q=60',
-  },
-  {
-    title: 'Triển lãm chương trình trao đổi quốc tế',
-    date: '28/04/2025',
-    excerpt: 'Sinh viên Pháp – Việt cùng phát triển các giải pháp kiến trúc ứng phó biến đổi khí hậu.',
-    image: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=60',
-  },
-  {
-    title: 'Danh sách xưởng sáng tạo mùa hè',
-    date: '20/04/2025',
-    excerpt: '05 xưởng chuyên đề sẽ mở đăng ký trong tháng 6, ưu tiên nhóm nghiên cứu liên ngành.',
-    image: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=60',
-  },
-  {
-    title: 'Danh sách xưởng sáng tạo mùa hè',
-    date: '20/04/2025',
-    excerpt: '05 xưởng chuyên đề sẽ mở đăng ký trong tháng 6, ưu tiên nhóm nghiên cứu liên ngành.',
-    image: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=60',
-  },
-    {
-    title: 'Triển lãm chương trình trao đổi quốc tế',
-    date: '28/04/2025',
-    excerpt: 'Sinh viên Pháp – Việt cùng phát triển các giải pháp kiến trúc ứng phó biến đổi khí hậu.',
-    image: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=60',
-  },
-]
+const startAutoSlide = () => {
+  stopAutoSlide()
+  if (events.value.length <= 1) return
+  autoSlideTimer = setInterval(() => {
+    currentEventIndex.value = (currentEventIndex.value + 1) % events.value.length
+  }, autoSlideDelayMs)
+}
 
-const reviewTopics = [
-  { title: 'Đồ án cải tạo nhà máy cũ', mentor: 'ThS. Nguyễn Trung Kiên', time: '09:00 - 10:30' },
-  { title: 'Ngõ tuyến xanh – Tuyến metro 05', mentor: 'TS. Lê Khánh Linh', time: '10:45 - 12:00' },
-  { title: 'Nhà triển lãm cộng đồng ven hồ', mentor: 'ThS. Ngô Minh Tâm', time: '13:30 - 15:00' },
-  { title: 'Học viện Khí hậu miền Trung', mentor: 'KTS. Đinh Hữu Thành', time: '15:15 - 16:30' },
-]
+onMounted(() => {
+  loadLatestPosts()
+  loadHighlightPosts()
+  loadAnnouncements()
+  loadEvents()
+  loadSandboxPosts()
+  loadReferencePosts()
+  loadYoutubeVideos()
+})
+
+onBeforeUnmount(() => {
+  stopAutoSlide()
+})
+
+watch(
+  () => events.value.length,
+  () => {
+    currentEventIndex.value = 0
+    startAutoSlide()
+  },
+)
+
+const sectionOneHero = computed(() => latestPosts.value[0])
+const sectionOneLeftPosts = computed(() => latestPosts.value.slice(1, 3))
+const sectionOneRightPosts = computed(() => latestPosts.value.slice(3, 5))
+const eventHero = computed(() => events.value[0])
+const showEventSection = computed(() => isEventsLoading.value || events.value.length > 0)
+const hasMultipleEvents = computed(() => events.value.length > 1)
+const sliderStyle = computed(() => ({
+  transform: `translateX(-${currentEventIndex.value * 100}%)`,
+}))
+
+const monthLabels = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12']
+const getEventDay = (event: EventItem) => {
+  if (!event.start_time) return '--'
+  const d = new Date(event.start_time)
+  return Number.isNaN(d.getTime()) ? '--' : String(d.getDate()).padStart(2, '0')
+}
+const getEventMonth = (event: EventItem) => {
+  if (!event.start_time) return '---'
+  const d = new Date(event.start_time)
+  return Number.isNaN(d.getTime()) ? '---' : monthLabels[d.getMonth()] ?? '---'
+}
+const getEventStatus = (event: EventItem) => {
+  if (!event.start_time) return 'Sắp diễn ra'
+  const now = Date.now()
+  const start = new Date(event.start_time).getTime()
+  const end = event.end_time ? new Date(event.end_time).getTime() : null
+  if (!Number.isNaN(start) && start > now) return 'Sắp diễn ra'
+  if (end && !Number.isNaN(end) && end < now) return 'Đã kết thúc'
+  return 'Đang diễn ra'
+}
+
+const goToEvent = (index: number) => {
+  if (!events.value.length) return
+  const safeIndex = ((index % events.value.length) + events.value.length) % events.value.length
+  currentEventIndex.value = safeIndex
+}
+
+const nextEvent = () => goToEvent(currentEventIndex.value + 1)
+const prevEvent = () => goToEvent(currentEventIndex.value - 1)
+
+const getPostLink = (post: Post) => post.link || (post.id ? `/posts/${post.id}` : post.slug ? `/posts/${post.slug}` : '#')
 
 const sandboxProjects = [
   {
@@ -183,36 +311,6 @@ const investorHighlights = [
   },
 ]
 
-const referenceLibrary = [
-  {
-    title: 'Sổ tay brief & rubric đồ án tốt nghiệp',
-    topic: 'Studio',
-    format: 'PDF',
-    description: 'Checklist nộp bài, tiêu chí chấm điểm và mốc thời gian cho đồ án tốt nghiệp.',
-    link: '#',
-  },
-  {
-    title: 'Hướng dẫn thiết kế kiến trúc thích ứng khí hậu',
-    topic: 'Thiết kế bền vững',
-    format: 'Ebook',
-    description: 'Nguyên tắc thông gió, che nắng, sử dụng vật liệu địa phương và các case study nhiệt đới.',
-    link: 'https://www.archdaily.com/search?query=climate%20design',
-  },
-  {
-    title: 'Danh mục vật liệu & nhà cung cấp 2025',
-    topic: 'Vật liệu',
-    format: 'Catalog',
-    description: 'Bảng dữ liệu vật liệu, chứng chỉ xanh và thông tin liên hệ đối tác trong nước.',
-    link: '#',
-  },
-  {
-    title: 'Playlist kết cấu cơ bản cho kiến trúc sư',
-    topic: 'Kết cấu',
-    format: 'Video',
-    description: '10 video về tải trọng, kết cấu thép và bê tông dành cho sinh viên năm 3.',
-    link: 'https://www.youtube.com/results?search_query=structural+design+architecture',
-  },
-]
 </script>
 
 <template>
@@ -245,46 +343,125 @@ const referenceLibrary = [
     </section>
 
     <section id="section-1" class="section-one">
-      <div class="section-one__frame">
+      <div v-if="latestError" class="section-one__state section-one__state--error">
+        {{ latestError }}
+      </div>
+      <div v-else-if="isLatestLoading" class="section-one__state">
+        Đang tải bài viết mới nhất...
+      </div>
+      <div v-else-if="!latestPosts.length" class="section-one__state">
+        Chưa có bài viết mới, quay lại sau nhé!
+      </div>
+      <div v-else class="section-one__frame">
         <div class="section-one__col">
-          <article v-for="post in sectionOneLeftPosts" :key="post.title" class="section-one__card">
-            <img :src="post.image" :alt="post.title" loading="lazy" />
+          <article
+            v-for="post in sectionOneLeftPosts"
+            :key="post.id ?? post.slug ?? post.title"
+            class="section-one__card"
+          >
+            <RouterLink :to="getPostLink(post)">
+              <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
+            </RouterLink>
             <div>
-              <p class="section-one__tag">{{ post.tag }}</p>
-              <h3>{{ post.title }}</h3>
+              <h3>{{ post.title || 'Bài viết mới' }}</h3>
             </div>
           </article>
         </div>
 
-        <article class="section-one__hero">
-          <img :src="sectionOneHero.image" :alt="sectionOneHero.title" loading="lazy" />
+        <article v-if="sectionOneHero" class="section-one__hero">
+          <RouterLink :to="getPostLink(sectionOneHero)">
+            <img
+              :src="getPostImage(sectionOneHero)"
+              :alt="sectionOneHero.title || getPostCategory(sectionOneHero)"
+              loading="lazy"
+            />
+          </RouterLink>
           <div>
-            <p class="section-one__tag">{{ sectionOneHero.category }}</p>
-            <h3>{{ sectionOneHero.title }}</h3>
-            <p>{{ sectionOneHero.excerpt }}</p>
+            <h3>{{ sectionOneHero.title || 'Bài viết mới' }}</h3>
+            <p>{{ getPostExcerpt(sectionOneHero) || 'Bài viết mới nhất từ khoa.' }}</p>
           </div>
         </article>
 
         <div class="section-one__col section-one__col--right">
-          <article v-for="post in sectionOneRightPosts" :key="post.title" class="section-one__card">
-            <img :src="post.image" :alt="post.title" loading="lazy" />
+          <article
+            v-for="post in sectionOneRightPosts"
+            :key="post.id ?? post.slug ?? post.title"
+            class="section-one__card"
+          >
+            <RouterLink :to="getPostLink(post)">
+              <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
+            </RouterLink>
             <div>
-              <p class="section-one__tag">{{ post.tag }}</p>
-              <h3>{{ post.title }}</h3>
+              <h3>{{ post.title || 'Bài viết mới' }}</h3>
             </div>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="section-2" class="event-banner">
-      <p class="section-tag">Section 2</p>
-      <h3>Post Event nào đã có thời gian cụ thể?</h3>
-      <p>Sẽ tự động biến mất sau thời gian đóng bật</p>
-      <div class="event-meta">
-        <p>FESTIVAL 2025</p>
-        <span>Ngày 18 - 24 / 06</span>
+    <section v-if="showEventSection" id="section-2" class="event-banner">
+      <p class="section-tag">Sự kiện</p>
+      <div v-if="eventsError" class="event-state event-state--error">
+        {{ eventsError }}
       </div>
+      <div v-else-if="isEventsLoading" class="event-state">Đang tải sự kiện...</div>
+      <div v-else-if="!events.length" class="event-state">Chưa có sự kiện nào.</div>
+      <template v-else>
+        <div
+          class="event-slider"
+          @mouseenter="stopAutoSlide()"
+          @mouseleave="startAutoSlide()"
+        >
+          <div class="event-slider__track" :style="sliderStyle">
+            <article
+              v-for="(event, idx) in events"
+              :key="event.id ?? event.title ?? idx"
+              class="event-slide"
+            >
+              <div class="event-slide__inner">
+                <div class="event-datecard">
+                  <p class="event-datecard__status">{{ getEventStatus(event) }}</p>
+                  <div class="event-datecard__day">{{ getEventDay(event) }}</div>
+                  <p class="event-datecard__month">{{ getEventMonth(event) }}</p>
+                  <span class="event-datecard__time">{{ formatEventTimeRange(event) }}</span>
+                </div>
+                <div class="event-content">
+                  <div class="event-chip">Sự kiện</div>
+                  <h3>{{ getEventTitle(event) }}</h3>
+                  <p class="event-subtitle">{{ getEventSubtitle(event) }}</p>
+                  <div class="event-meta">
+                    <div>
+                      <span class="event-meta__label">Thời gian</span>
+                      <p class="event-meta__value">{{ formatEventDateRange(event) }}</p>
+                      <p class="event-meta__value event-meta__value--muted">{{ formatEventTimeRange(event) }}</p>
+                    </div>
+                    <div>
+                      <span class="event-meta__label">Địa điểm</span>
+                      <p class="event-meta__value">{{ event.location || 'Đang cập nhật' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div v-if="hasMultipleEvents" class="event-slider__controls">
+            <button class="event-btn" type="button" @click="prevEvent">‹</button>
+            <div class="event-dots">
+              <button
+                v-for="(event, idx) in events"
+                :key="event.id ?? event.title ?? idx"
+                type="button"
+                class="event-dot"
+                :class="{ 'event-dot--active': idx === currentEventIndex }"
+                @click="goToEvent(idx)"
+                :aria-label="`Chuyển đến sự kiện ${idx + 1}`"
+              ></button>
+            </div>
+            <button class="event-btn" type="button" @click="nextEvent">›</button>
+          </div>
+        </div>
+      </template>
     </section>
 
     <section id="section-3" class="news-section">
@@ -295,12 +472,19 @@ const referenceLibrary = [
       </header>
       <div class="news-columns">
         <div class="news-stream">
-          <article v-for="post in highlightNews" :key="post.title" class="news-card">
-            <img :src="post.image" :alt="post.title" loading="lazy" />
+          <div v-if="highlightError" class="section-one__state section-one__state--error">
+            {{ highlightError }}
+          </div>
+          <div v-else-if="isHighlightLoading" class="section-one__state">Đang tải tin nổi bật...</div>
+          <div v-else-if="!highlightPosts.length" class="section-one__state">Chưa có tin nổi bật.</div>
+          <article v-else v-for="post in highlightPosts" :key="post.id ?? post.slug ?? post.title" class="news-card">
+            <RouterLink :to="getPostLink(post)" class="news-card__media">
+              <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
+            </RouterLink>
             <div>
-              <p class="news-date">{{ post.date }}</p>
-              <h3>{{ post.title }}</h3>
-              <p>{{ post.excerpt }}</p>
+              <p class="news-date">{{ getPostDate(post) }}</p>
+              <h3>{{ post.title || 'Tin mới' }}</h3>
+              <p>{{ getPostExcerpt(post) }}</p>
             </div>
           </article>
         </div>
@@ -336,11 +520,16 @@ const referenceLibrary = [
         </div>
       </header>
       <div class="widget">
-        <ul>
-          <li v-for="topic in reviewTopics" :key="topic.title">
-            <h4>{{ topic.title }}</h4>
-            <p>{{ topic.mentor }}</p>
-            <span>{{ topic.time }}</span>
+        <div v-if="announcementsError" class="section-one__state section-one__state--error">
+          {{ announcementsError }}
+        </div>
+        <div v-else-if="isAnnouncementsLoading" class="section-one__state">Đang tải thông báo...</div>
+        <div v-else-if="!announcementPosts.length" class="section-one__state">Chưa có thông báo.</div>
+        <ul v-else>
+          <li v-for="post in announcementPosts" :key="post.id ?? post.slug ?? post.title">
+            <h4>{{ post.title || 'Thông báo mới' }}</h4>
+            <p>{{ getPostShortDescription(post) }}</p>
+            <span>{{ getPostDate(post) }}</span>
           </li>
         </ul>
       </div>
@@ -352,17 +541,51 @@ const referenceLibrary = [
           <p class="section-tag">Sandbox</p>
         </div>
       </header>
-      <div class="sandbox-grid">
-        <article v-for="item in sandboxProjects" :key="item.title" class="sandbox-card">
-          <div class="sandbox-card__media">
-            <img :src="item.image" :alt="item.title" loading="lazy" />
+      <div class="sandbox-wrapper">
+        <div v-if="sandboxError" class="section-one__state section-one__state--error">
+          {{ sandboxError }}
+        </div>
+        <div v-else-if="isSandboxLoading" class="section-one__state">Đang tải bài Sandbox...</div>
+        <div v-else-if="!sandboxRowOne.length && !sandboxRowTwo.length" class="section-one__state">Chưa có bài Sandbox.</div>
+        <template v-else>
+          <div class="sandbox-row">
+            <div class="sandbox-grid">
+              <article
+                v-for="post in sandboxRowOne"
+                :key="post.slug ?? post.title"
+                class="sandbox-card"
+              >
+                <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__media">
+                  <img :src="post.image" :alt="post.title" loading="lazy" />
+                </a>
+                <div class="sandbox-card__body">
+                  <p class="sandbox-card__category">Bài mới</p>
+                  <h3>{{ post.title }}</h3>
+                  <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link">Đọc bài →</a>
+                </div>
+              </article>
+            </div>
           </div>
-          <div class="sandbox-card__body">
-            <p class="sandbox-card__category">{{ item.category }}</p>
-            <h3>{{ item.title }}</h3>
-            <p class="sandbox-card__summary">{{ item.summary }}</p>
+
+          <div class="sandbox-row">
+            <div class="sandbox-grid">
+              <article
+                v-for="post in sandboxRowTwo"
+                :key="post.slug ?? post.title"
+                class="sandbox-card"
+              >
+                <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__media">
+                  <img :src="post.image" :alt="post.title" loading="lazy" />
+                </a>
+                <div class="sandbox-card__body">
+                  <p class="sandbox-card__category">Chuyên mục</p>
+                  <h3>{{ post.title }}</h3>
+                  <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link">Đọc bài →</a>
+                </div>
+              </article>
+            </div>
           </div>
-        </article>
+        </template>
       </div>
     </section>
 
@@ -416,14 +639,23 @@ const referenceLibrary = [
         </div>
       </header>
       <div class="content-grid reference-grid">
-        <article v-for="item in referenceLibrary" :key="item.title" class="content-card reference-card">
+        <div v-if="referenceError" class="section-one__state section-one__state--error">
+          {{ referenceError }}
+        </div>
+        <div v-else-if="isReferenceLoading" class="section-one__state">Đang tải thư viện...</div>
+        <div v-else-if="!referencePosts.length" class="section-one__state">Chưa có tài liệu.</div>
+        <article
+          v-else
+          v-for="item in referencePosts"
+          :key="item.id ?? item.slug ?? item.title"
+          class="content-card reference-card"
+        >
           <div class="reference-meta">
-            <span class="pill">{{ item.format }}</span>
-            <span class="reference-topic">{{ item.topic }}</span>
+            <span class="pill">Tài liệu</span>
           </div>
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.description }}</p>
-          <a :href="item.link" target="_blank" rel="noopener" class="reference-link">Mở tài liệu</a>
+          <h3>{{ item.title || 'Tài liệu' }}</h3>
+          <p>{{ getPostShortDescription(item) }}</p>
+          <span class="reference-link">Mở tài liệu</span>
         </article>
       </div>
     </section>
