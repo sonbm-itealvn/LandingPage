@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting…</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Preserve the requested path for SPA redirect after reload on deep links
+      sessionStorage.setItem('redirect', location.pathname + location.search + location.hash)
+      // Redirect to root where the SPA is served
+      location.replace('/')
+    </script>
+  </head>
+  <body></body>
+</html>
+
