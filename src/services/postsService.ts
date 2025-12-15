@@ -23,6 +23,7 @@ export type Post = {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 const POSTS_ENDPOINT = `${API_BASE_URL}/posts/latest`
+const ALL_POSTS_ENDPOINT = `${API_BASE_URL}/posts`
 const FALLBACK_POST_IMAGE =
   'https://images.unsplash.com/photo-1464146072230-91cabc968266?auto=format&fit=crop&w=900&q=80'
 
@@ -80,6 +81,19 @@ export const fetchLatestPosts = async (limit = 5): Promise<Post[]> => {
       ? (data as { data?: Post[] }).data ?? []
       : []
   return posts.slice(0, limit)
+}
+
+export const fetchAllPosts = async (): Promise<Post[]> => {
+  const response = await fetch(ALL_POSTS_ENDPOINT)
+  if (!response.ok) {
+    throw new Error('Không thể tải danh sách bài viết.')
+  }
+  const data = await response.json()
+  return Array.isArray(data)
+    ? data
+    : Array.isArray((data as { data?: unknown[] })?.data)
+      ? (data as { data?: Post[] }).data ?? []
+      : []
 }
 
 export const fetchLatestPostsByCategory = async (slug: string, limit = 5): Promise<Post[]> => {

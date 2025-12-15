@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
-
+import { ref, watch } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
+import headerLogo from '../../logo_khoa-kien-truc-edit2024.png'
 const utilityLinks = [
   { label: 'Quảng Cáo', href: '#' },
   { label: 'Gửi Bài', href: '#' },
@@ -15,13 +16,31 @@ const socialLinks = [
 
 const siteNavLinks = [
   { label: 'Trang Chủ', to: '/' },
-  { label: 'Đào tạo', to: '/dao-tao' },
-  { label: 'Sinh viên', to: '/sinh-vien' },
-  { label: 'Hoạt động khoa', to: '/hoat-dong-khoa' },
-  { label: 'Hợp tác - Kết nối', to: '/hop-tac-ket-noi' },
+  { label: 'Đào tạo', to: '/dao-tao', locked: true },
+  { label: 'Giới thiệu', to: '/about' },
+  { label: 'Hoạt động khoa', to: '/hoat-dong-khoa', locked: true },
+  { label: 'Hợp tác - Kết nối', to: '/hop-tac-ket-noi', locked: true },
   { label: 'Tin tức', to: '/tin-tuc' },
   { label: 'Tạp chí kiến trúc', href: 'https://www.tapchikientruc.com.vn/' },
 ]
+
+const isNavOpen = ref(false)
+const route = useRoute()
+
+const toggleNav = () => {
+  isNavOpen.value = !isNavOpen.value
+}
+
+const closeNav = () => {
+  isNavOpen.value = false
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    closeNav()
+  },
+)
 
 const aboutCards = [
   { title: 'Giảng viên hướng dẫn', body: '45+ giảng viên, kiến trúc sư, nghệ sĩ cộng tác hướng dẫn khóa đồ án', color: '#f8b72b' },
@@ -77,7 +96,7 @@ const activityCards = [
       <div class="brand-band" id="top">
         <div class="brand-identity">
           <div class="logo-panel">
-            <img src="https://dummyimage.com/120x120/0182c2/ffffff&text=FA" alt="Faculty of Architecture logo placeholder" loading="lazy" />
+            <img :src="headerLogo" alt="Khoa Kiến Trúc logo" loading="lazy" />
           </div>
           <div class="brand-copy">
             <p class="brand-label">Faculty of Architecture</p>
@@ -92,14 +111,32 @@ const activityCards = [
             </svg>
           </button>
         </form>
+        <button class="nav-toggle" type="button" :aria-expanded="isNavOpen" aria-controls="site-nav" @click="toggleNav">
+          <span class="sr-only">Mở/đóng menu</span>
+          <svg v-if="!isNavOpen" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 6h18M3 12h18M3 18h18" />
+          </svg>
+          <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M6 18L18 6" />
+          </svg>
+        </button>
       </div>
 
-      <nav class="site-nav">
+      <nav id="site-nav" class="site-nav" :class="{ 'site-nav--open': isNavOpen }">
         <template v-for="link in siteNavLinks" :key="link.label">
-          <RouterLink v-if="link.to" :to="link.to">
+          <button
+            v-if="link.locked"
+            type="button"
+            class="nav-link nav-link--disabled"
+            title="Tính năng đang khóa"
+            disabled
+          >
+            {{ link.label }}
+          </button>
+          <RouterLink v-else-if="link.to" :to="link.to" @click="closeNav">
             {{ link.label }}
           </RouterLink>
-          <a v-else :href="link.href" target="_blank" rel="noopener">
+          <a v-else :href="link.href" target="_blank" rel="noopener" @click="closeNav">
             {{ link.label }}
           </a>
         </template>

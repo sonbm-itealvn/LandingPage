@@ -1,85 +1,91 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import MasterLayout from '../components/MasterLayout.vue'
+import {
+  fetchAllPosts,
+  getPostCategory,
+  getPostDate,
+  getPostExcerpt,
+  getPostImage,
+  getPostShortDescription,
+  type Post,
+} from '../services/postsService'
 
-const newsHighlights = [
-  {
-    title: 'Khai mạc Festival Đồ án 2025',
-    date: '12/05/2025',
-    summary: '35 đồ án được tuyển chọn, triển lãm tại sảnh chính và khu studio.',
-  },
-  {
-    title: 'Workshop: Vỏ công trình thích ứng khí hậu',
-    date: '08/05/2025',
-    summary: 'Chuyên gia TU Berlin trình bày case study và thực hành mô phỏng năng lượng.',
-  },
-  {
-    title: 'Trao học bổng LIXIL mùa xuân',
-    date: '02/05/2025',
-    summary: '12 suất học bổng cho đồ án nghiên cứu vật liệu xanh và nhà ở bền vững.',
-  },
-  {
-    title: 'Công bố đề tài studio liên kết 2025-2',
-    date: '25/04/2025',
-    summary: '05 đề tài liên kết với doanh nghiệp, mở đăng ký cho sinh viên năm 3-5.',
-  },
-]
+const posts = ref<Post[]>([])
+const isLoading = ref(true)
+const error = ref('')
 
-const quickLinks = [
-  { label: 'Thông báo tuyển sinh', note: 'Điều kiện, mốc thời gian và hình thức xét tuyển.' },
-  { label: 'Lịch workshop tháng', note: 'Cập nhật mỗi thứ Hai, đăng ký online trước 24h.' },
-  { label: 'Kết quả cuộc thi nội bộ', note: 'Top 10 bài đoạt giải, thư viện poster và mô hình.' },
-]
+const loadPosts = async () => {
+  isLoading.value = true
+  error.value = ''
+  try {
+    posts.value = await fetchAllPosts()
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Đã xảy ra lỗi khi tải danh sách bài viết.'
+    posts.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const getPostLink = (post: Post) => post.link || (post.id ? `/posts/${post.id}` : post.slug ? `/posts/${post.slug}` : '#')
+const getDescription = (post: Post) => getPostShortDescription(post, 180) || getPostExcerpt(post, 180)
+
+onMounted(() => {
+  loadPosts()
+})
 </script>
 
 <template>
   <MasterLayout>
-    <section class="content-hero">
+    <section class="content-hero news-hero">
       <p class="content-hero__eyebrow">Tin tức</p>
-      <h1>Điểm tin nổi bật của khoa</h1>
+      <h1>Toàn bộ tin tức của khoa</h1>
       <p class="content-hero__lede">
-        Cập nhật hoạt động, workshop, học bổng và các cuộc thi dành cho sinh viên, giảng viên và cộng đồng kiến trúc.
+        Danh sách đầy đủ các bài viết, sự kiện, workshop, học bổng và hoạt động nội bộ. Nội dung được cập nhật trực tiếp
+        từ API.
       </p>
       <div class="content-hero__tags">
-        <span class="pill">Tin chính</span>
+        <span class="pill">Tin mới</span>
+        <span class="pill">Hoạt động</span>
         <span class="pill">Workshop</span>
-        <span class="pill">Học bổng</span>
       </div>
     </section>
 
-    <section class="content-section">
-      <div class="content-section__header">
+    <section class="news-listing">
+      <div class="news-listing__header">
         <div>
           <p class="section-tag">Bản tin</p>
-          <h2>Tin mới</h2>
+          <h2>Tất cả bài viết</h2>
         </div>
       </div>
-      <div class="split-panel">
-        <div class="panel">
-          <ul class="list-stack news-list">
-            <li v-for="item in newsHighlights" :key="item.title">
-              <h3>{{ item.title }}</h3>
-              <p>{{ item.summary }}</p>
-              <span>{{ item.date }}</span>
-            </li>
-          </ul>
-        </div>
-        <div class="panel">
-          <p class="section-tag">Truy cập nhanh</p>
-          <ul class="list-stack">
-            <li v-for="link in quickLinks" :key="link.label">
-              <h4>{{ link.label }}</h4>
-              <p>{{ link.note }}</p>
-            </li>
-          </ul>
-          <div class="cta-strip" style="margin-top: 1rem">
-            <div>
-              <p class="section-tag">Theo dõi</p>
-              <strong>news@hau.edu.vn</strong>
-              <p>Nhận bản tin hàng tuần qua email.</p>
-            </div>
-            <a href="mailto:news@hau.edu.vn">Đăng ký nhận tin ↗</a>
+
+      <div v-if="error" class="section-one__state section-one__state--error">
+        {{ error }}
+      </div>
+      <div v-else-if="isLoading" class="section-one__state">Đang tải tin tức...</div>
+      <div v-else-if="!posts.length" class="section-one__state">Chưa có bài viết nào.</div>
+      <div v-else class="news-listing__grid">
+        <article
+          v-for="post in posts"
+          :key="post.id ?? post.slug ?? post.title"
+          class="news-item"
+        >
+          <RouterLink :to="getPostLink(post)" class="news-item__thumb">
+            <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
+          </RouterLink>
+          <div class="news-item__body">
+            <p class="news-item__meta">
+              {{ getPostCategory(post) }}<span v-if="getPostDate(post)"> · {{ getPostDate(post) }}</span>
+            </p>
+            <RouterLink :to="getPostLink(post)" class="news-item__title">
+              <h3 class="clamp-2">{{ post.title || 'Bài viết' }}</h3>
+            </RouterLink>
+            <p class="news-item__excerpt">{{ getDescription(post) }}</p>
+            <RouterLink :to="getPostLink(post)" class="news-item__cta">Xem chi tiết →</RouterLink>
           </div>
-        </div>
+        </article>
       </div>
     </section>
   </MasterLayout>

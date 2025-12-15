@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import MasterLayout from '../components/MasterLayout.vue'
 import { RouterLink } from 'vue-router'
+import { fetchBanners, type Banner } from '../services/bannersService'
 import {
   fetchLatestYoutubeVideos,
   formatVideoDate,
@@ -48,6 +49,10 @@ const announcementPosts = ref<Post[]>([])
 const isAnnouncementsLoading = ref(true)
 const announcementsError = ref('')
 
+const techPosts = ref<Post[]>([])
+const isTechLoading = ref(true)
+const techError = ref('')
+
 const sandboxRowOne = ref<SandboxPost[]>([])
 const sandboxRowTwo = ref<SandboxPost[]>([])
 const isSandboxLoading = ref(true)
@@ -60,6 +65,9 @@ const referenceError = ref('')
 const youtubeVideos = ref<YoutubeVideo[]>([])
 const isVideosLoading = ref(true)
 const videoError = ref('')
+
+const banners = ref<Banner[]>([])
+const bannersError = ref('')
 
 const loadLatestPosts = async () => {
   isLatestLoading.value = true
@@ -97,6 +105,19 @@ const loadAnnouncements = async () => {
     announcementPosts.value = []
   } finally {
     isAnnouncementsLoading.value = false
+  }
+}
+
+const loadTechPosts = async () => {
+  isTechLoading.value = true
+  techError.value = ''
+  try {
+    techPosts.value = await fetchLatestPostsByCategory('cong-nghe-kien-truc', 4)
+  } catch (error) {
+    techError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải Công nghệ kiến trúc.'
+    techPosts.value = []
+  } finally {
+    isTechLoading.value = false
   }
 }
 
@@ -154,6 +175,16 @@ const loadEvents = async () => {
   }
 }
 
+const loadBanners = async () => {
+  bannersError.value = ''
+  try {
+    banners.value = await fetchBanners(true)
+  } catch (error) {
+    bannersError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải banner.'
+    banners.value = []
+  }
+}
+
 const autoSlideDelayMs = 5000
 let autoSlideTimer: ReturnType<typeof setInterval> | null = null
 
@@ -177,9 +208,11 @@ onMounted(() => {
   loadHighlightPosts()
   loadAnnouncements()
   loadEvents()
+  loadTechPosts()
   loadSandboxPosts()
   loadReferencePosts()
   loadYoutubeVideos()
+  loadBanners()
 })
 
 onBeforeUnmount(() => {
@@ -202,6 +235,13 @@ const showEventSection = computed(() => isEventsLoading.value || events.value.le
 const hasMultipleEvents = computed(() => events.value.length > 1)
 const sliderStyle = computed(() => ({
   transform: `translateX(-${currentEventIndex.value * 100}%)`,
+}))
+
+const DEFAULT_HERO_IMAGE =
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80'
+const heroImage = computed(() => banners.value[0]?.image || DEFAULT_HERO_IMAGE)
+const heroStyle = computed(() => ({
+  backgroundImage: `linear-gradient(135deg, rgba(17, 24, 39, 0.4), rgba(8, 47, 73, 0.6)), url('${heroImage.value}')`,
 }))
 
 const monthLabels = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12']
@@ -315,7 +355,7 @@ const investorHighlights = [
 
 <template>
   <MasterLayout>
-    <section class="hero">
+    <section class="hero" :style="heroStyle">
       <p class="eyebrow">2025 Studio Showcase</p>
       <h1>KHOA KIẾN TRÚC</h1>
       <p class="hero-lede">
@@ -363,7 +403,7 @@ const investorHighlights = [
               <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
             </RouterLink>
             <div>
-              <h3>{{ post.title || 'Bài viết mới' }}</h3>
+              <h3 class="clamp-2">{{ post.title || 'Bài viết mới' }}</h3>
             </div>
           </article>
         </div>
@@ -377,7 +417,7 @@ const investorHighlights = [
             />
           </RouterLink>
           <div>
-            <h3>{{ sectionOneHero.title || 'Bài viết mới' }}</h3>
+            <h3 class="clamp-2">{{ sectionOneHero.title || 'Bài viết mới' }}</h3>
             <p>{{ getPostExcerpt(sectionOneHero) || 'Bài viết mới nhất từ khoa.' }}</p>
           </div>
         </article>
@@ -392,7 +432,7 @@ const investorHighlights = [
               <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
             </RouterLink>
             <div>
-              <h3>{{ post.title || 'Bài viết mới' }}</h3>
+              <h3 class="clamp-2">{{ post.title || 'Bài viết mới' }}</h3>
             </div>
           </article>
         </div>
@@ -400,7 +440,12 @@ const investorHighlights = [
     </section>
 
     <section v-if="showEventSection" id="section-2" class="event-banner">
-      <p class="section-tag">Sự kiện</p>
+      <header class="section-header">
+        <div>
+          <p class="section-tag">Sự kiện</p>
+        </div>
+        <RouterLink class="see-more-btn" to="/hoat-dong-khoa">Xem thêm</RouterLink>
+      </header>
       <div v-if="eventsError" class="event-state event-state--error">
         {{ eventsError }}
       </div>
@@ -427,7 +472,7 @@ const investorHighlights = [
                 </div>
                 <div class="event-content">
                   <div class="event-chip">Sự kiện</div>
-                  <h3>{{ getEventTitle(event) }}</h3>
+                  <h3 class="clamp-2">{{ getEventTitle(event) }}</h3>
                   <p class="event-subtitle">{{ getEventSubtitle(event) }}</p>
                   <div class="event-meta">
                     <div>
@@ -465,10 +510,12 @@ const investorHighlights = [
     </section>
 
     <section id="section-3" class="news-section">
-      <header class="section-header stacked">
+      <header class="section-header">
         <div>
+          <p class="section-tag">Tin tức</p>
           <h2>Tin nổi bật</h2>
         </div>
+        <RouterLink class="see-more-btn" to="/tin-tuc">Xem thêm</RouterLink>
       </header>
       <div class="news-columns">
         <div class="news-stream">
@@ -483,10 +530,26 @@ const investorHighlights = [
             </RouterLink>
             <div>
               <p class="news-date">{{ getPostDate(post) }}</p>
-              <h3>{{ post.title || 'Tin mới' }}</h3>
+              <h3 class="clamp-2">{{ post.title || 'Tin mới' }}</h3>
               <p>{{ getPostExcerpt(post) }}</p>
             </div>
           </article>
+
+          <div id="faculty-announcements" class="widget widget--stacked announcements-widget">
+            <p class="widget-title">Thông báo</p>
+            <div v-if="announcementsError" class="section-one__state section-one__state--error">
+              {{ announcementsError }}
+            </div>
+            <div v-else-if="isAnnouncementsLoading" class="section-one__state">Đang tải thông báo...</div>
+            <div v-else-if="!announcementPosts.length" class="section-one__state">Chưa có thông báo.</div>
+            <ul v-else>
+              <li v-for="post in announcementPosts" :key="post.id ?? post.slug ?? post.title">
+                <h4>{{ post.title || 'Thông báo mới' }}</h4>
+                <p>{{ getPostShortDescription(post) }}</p>
+                <span>{{ getPostDate(post) }}</span>
+              </li>
+            </ul>
+          </div>
         </div>
         <aside class="news-side">
           <div class="widget">
@@ -511,35 +574,44 @@ const investorHighlights = [
           </div>
         </aside>
       </div>
+
     </section>
 
-    <section id="faculty-announcements" class="updates-section">
-      <header class="section-header stacked">
+    <section v-if="isTechLoading || techPosts.length" id="architecture-tech" class="updates-section">
+      <header class="section-header">
         <div>
-          <p class="section-tag">Thông báo</p>
+          <p class="section-tag">Công nghệ kiến trúc</p>
         </div>
+        <RouterLink class="see-more-btn" to="/tin-tuc">Xem thêm</RouterLink>
       </header>
-      <div class="widget">
-        <div v-if="announcementsError" class="section-one__state section-one__state--error">
-          {{ announcementsError }}
+      <div class="content-grid reference-grid">
+        <div v-if="techError" class="section-one__state section-one__state--error">
+          {{ techError }}
         </div>
-        <div v-else-if="isAnnouncementsLoading" class="section-one__state">Đang tải thông báo...</div>
-        <div v-else-if="!announcementPosts.length" class="section-one__state">Chưa có thông báo.</div>
-        <ul v-else>
-          <li v-for="post in announcementPosts" :key="post.id ?? post.slug ?? post.title">
-            <h4>{{ post.title || 'Thông báo mới' }}</h4>
-            <p>{{ getPostShortDescription(post) }}</p>
-            <span>{{ getPostDate(post) }}</span>
-          </li>
-        </ul>
+        <div v-else-if="isTechLoading" class="section-one__state">Đang tải Công nghệ kiến trúc...</div>
+        <div v-else-if="!techPosts.length" class="section-one__state">Chưa có bài viết.</div>
+        <article
+          v-else
+          v-for="item in techPosts"
+          :key="item.id ?? item.slug ?? item.title"
+          class="content-card reference-card"
+        >
+          <div class="reference-meta">
+            <span class="pill">Công nghệ</span>
+          </div>
+          <h3 class="clamp-2">{{ item.title || 'Bài viết' }}</h3>
+          <p>{{ getPostShortDescription(item) }}</p>
+          <span class="reference-link">Xem chi tiết</span>
+        </article>
       </div>
     </section>
 
     <section id="sandbox-updates" class="sandbox-section">
-      <header class="section-header stacked">
+      <header class="section-header">
         <div>
-          <p class="section-tag">Sandbox</p>
+          <p class="section-tag">Tạp chí kiến trúc</p>
         </div>
+        <a class="see-more-btn" href="https://www.tapchikientruc.com.vn/" target="_blank" rel="noopener">Xem thêm</a>
       </header>
       <div class="sandbox-wrapper">
         <div v-if="sandboxError" class="section-one__state section-one__state--error">
@@ -560,7 +632,7 @@ const investorHighlights = [
                 </a>
                 <div class="sandbox-card__body">
                   <p class="sandbox-card__category">Bài mới</p>
-                  <h3>{{ post.title }}</h3>
+                  <h3 class="clamp-2">{{ post.title }}</h3>
                   <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link">Đọc bài →</a>
                 </div>
               </article>
@@ -579,7 +651,7 @@ const investorHighlights = [
                 </a>
                 <div class="sandbox-card__body">
                   <p class="sandbox-card__category">Chuyên mục</p>
-                  <h3>{{ post.title }}</h3>
+                  <h3 class="clamp-2">{{ post.title }}</h3>
                   <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link">Đọc bài →</a>
                 </div>
               </article>
@@ -622,7 +694,7 @@ const investorHighlights = [
           </div>
           <div class="video-body">
             <p class="video-channel">{{ getVideoChannel(video) }}</p>
-            <h3>{{ video.title || 'Video mới' }}</h3>
+            <h3 class="clamp-2">{{ video.title || 'Video mới' }}</h3>
             <div class="video-meta">
               <span>{{ formatVideoDate(video.publishedAt) }}</span>
               <a :href="getVideoUrl(video)" target="_blank" rel="noopener" class="video-link">Xem ngay</a>
@@ -632,11 +704,12 @@ const investorHighlights = [
       </div>
     </section>
 
-    <section id="reference-library" class="reference-section">
-      <header class="section-header stacked">
+    <section v-if="isReferenceLoading || referencePosts.length" id="reference-library" class="reference-section">
+      <header class="section-header">
         <div>
           <p class="section-tag">Thư viện</p>
         </div>
+        <RouterLink class="see-more-btn" to="/tin-tuc">Xem thêm</RouterLink>
       </header>
       <div class="content-grid reference-grid">
         <div v-if="referenceError" class="section-one__state section-one__state--error">
@@ -653,7 +726,7 @@ const investorHighlights = [
           <div class="reference-meta">
             <span class="pill">Tài liệu</span>
           </div>
-          <h3>{{ item.title || 'Tài liệu' }}</h3>
+          <h3 class="clamp-2">{{ item.title || 'Tài liệu' }}</h3>
           <p>{{ getPostShortDescription(item) }}</p>
           <span class="reference-link">Mở tài liệu</span>
         </article>
