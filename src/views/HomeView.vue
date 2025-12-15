@@ -86,7 +86,7 @@ const loadHighlightPosts = async () => {
   isHighlightLoading.value = true
   highlightError.value = ''
   try {
-    highlightPosts.value = await fetchLatestPostsByCategory('hoat-dong-khoa', 5)
+    highlightPosts.value = await fetchLatestPostsByCategory('hoat-dong-khoa', 6)
   } catch (error) {
     highlightError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải tin nổi bật.'
     highlightPosts.value = []
@@ -236,6 +236,7 @@ const hasMultipleEvents = computed(() => events.value.length > 1)
 const sliderStyle = computed(() => ({
   transform: `translateX(-${currentEventIndex.value * 100}%)`,
 }))
+const highlightColumns = computed(() => [highlightPosts.value.slice(0, 3), highlightPosts.value.slice(3, 6)])
 
 const DEFAULT_HERO_IMAGE =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80'
@@ -524,16 +525,20 @@ const investorHighlights = [
           </div>
           <div v-else-if="isHighlightLoading" class="section-one__state">Đang tải tin nổi bật...</div>
           <div v-else-if="!highlightPosts.length" class="section-one__state">Chưa có tin nổi bật.</div>
-          <article v-else v-for="post in highlightPosts" :key="post.id ?? post.slug ?? post.title" class="news-card">
-            <RouterLink :to="getPostLink(post)" class="news-card__media">
-              <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
-            </RouterLink>
-            <div>
-              <p class="news-date">{{ getPostDate(post) }}</p>
-              <h3 class="clamp-2">{{ post.title || 'Tin mới' }}</h3>
-              <p>{{ getPostExcerpt(post) }}</p>
+          <div v-else class="news-grid">
+            <div v-for="(col, cIdx) in highlightColumns" :key="`col-${cIdx}`" class="news-grid__col">
+              <article v-for="post in col" :key="post.id ?? post.slug ?? post.title" class="news-card">
+                <RouterLink :to="getPostLink(post)" class="news-card__media">
+                  <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
+                </RouterLink>
+                <div>
+                  <p class="news-date">{{ getPostDate(post) }}</p>
+                  <h3 class="clamp-2">{{ post.title || 'Tin mới' }}</h3>
+                  <p>{{ getPostExcerpt(post) }}</p>
+                </div>
+              </article>
             </div>
-          </article>
+          </div>
 
           <div id="faculty-announcements" class="widget widget--stacked announcements-widget">
             <p class="widget-title">Thông báo</p>
