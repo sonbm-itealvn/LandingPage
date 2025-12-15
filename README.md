@@ -2,6 +2,31 @@
 
 This template should help get you started developing with Vue 3 in Vite.
 
+### Cache headers (khuyến nghị deploy)
+
+- Không cache `index.html` (no-store/no-cache) để tránh trình duyệt giữ bản cũ sau mỗi lần build.
+- Chỉ cache dài các file tĩnh đã có hash (thư mục `assets/`) bằng `Cache-Control: public, immutable`.
+
+Ví dụ Nginx:
+```
+location = /index.html {
+  add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate";
+  add_header Pragma "no-cache";
+  add_header Expires 0;
+  try_files $uri =404;
+}
+
+location / {
+  try_files $uri $uri/ /index.html;
+}
+
+location /assets/ {
+  expires 1y;
+  add_header Cache-Control "public, immutable";
+  try_files $uri =404;
+}
+```
+
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).

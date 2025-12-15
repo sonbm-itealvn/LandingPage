@@ -482,9 +482,7 @@ const investorHighlights = [
                   <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
                 </RouterLink>
                 <div>
-                  <p class="news-date">{{ getPostDate(post) }}</p>
                   <h3 class="clamp-2">{{ post.title || 'Tin mới' }}</h3>
-                  <p>{{ getPostExcerpt(post) }}</p>
                 </div>
               </article>
             </div>
@@ -500,8 +498,6 @@ const investorHighlights = [
             <ul v-else>
               <li v-for="post in announcementPosts" :key="post.id ?? post.slug ?? post.title">
                 <h4>{{ post.title || 'Thông báo mới' }}</h4>
-                <p>{{ getPostShortDescription(post) }}</p>
-                <span>{{ getPostDate(post) }}</span>
               </li>
             </ul>
           </div>
