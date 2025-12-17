@@ -178,7 +178,7 @@ const loadEvents = async () => {
 const loadBanners = async () => {
   bannersError.value = ''
   try {
-    banners.value = await fetchBanners(true)
+    banners.value = await fetchBanners()
   } catch (error) {
     bannersError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải banner.'
     banners.value = []
@@ -292,14 +292,54 @@ watch(
   },
 )
 
+const bannerVideoError = ref(false)
+const handleVideoError = () => {
+  bannerVideoError.value = true
+}
+
 const DEFAULT_HERO_IMAGE =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80'
 
 const isVideoUrl = (url: string): boolean => {
   if (!url) return false
-  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']
+  
   const urlLower = url.toLowerCase()
-  return videoExtensions.some((ext) => urlLower.includes(ext)) || urlLower.includes('video')
+  
+  // Check if URL path contains '/video/' (common in CDN like Cloudinary)
+  if (urlLower.includes('/video/')) {
+    return true
+  }
+  
+  // Check file extension (remove query params first)
+  const urlWithoutQuery = urlLower.split('?')[0]
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv', '.m4v', '.flv', '.wmv']
+  const hasVideoExtension = videoExtensions.some((ext) => urlWithoutQuery.endsWith(ext))
+  
+  // Check if URL contains 'video' keyword (but not 'image')
+  const hasVideoKeyword = urlLower.includes('video') && !urlLower.includes('image')
+  
+  return hasVideoExtension || hasVideoKeyword
+}
+
+// Convert Cloudinary video URL to supported format (mp4)
+const convertVideoUrl = (url: string): string => {
+  if (!url) return url
+  // If it's a Cloudinary video URL, convert to mp4 format
+  if (url.includes('res.cloudinary.com') && url.includes('/video/')) {
+    // Cloudinary supports format transformation via URL parameters
+    // Try to convert to mp4 by replacing extension or adding format parameter
+    if (url.includes('/upload/')) {
+      // Split at /upload/ to insert transformation
+      const parts = url.split('/upload/')
+      if (parts.length === 2) {
+        // Add format transformation: f_mp4 for mp4 format
+        return `${parts[0]}/upload/f_mp4/${parts[1].replace(/\.(avi|mov|mkv|wmv|flv|webm)$/i, '.mp4')}`
+      }
+    }
+    // Fallback: just replace extension
+    return url.replace(/\.(avi|mov|mkv|wmv|flv|webm)$/i, '.mp4')
+  }
+  return url
 }
 
 const currentBanner = computed(() => banners.value[0])
@@ -307,14 +347,40 @@ const bannerUrl = computed(() => {
   if (!currentBanner.value) return null
   return currentBanner.value.image_url || currentBanner.value.image || null
 })
+const videoUrl = computed(() => {
+  if (!bannerUrl.value || !isVideoUrl(bannerUrl.value)) return null
+  return convertVideoUrl(bannerUrl.value)
+})
 const heroImage = computed(() => bannerUrl.value || DEFAULT_HERO_IMAGE)
-const isVideoBanner = computed(() => bannerUrl.value ? isVideoUrl(bannerUrl.value) : false)
+const isVideoBanner = computed(() => {
+  if (!bannerUrl.value) return false
+  return isVideoUrl(bannerUrl.value)
+})
+
 const heroStyle = computed(() => {
-  if (isVideoBanner.value) return {}
+  // If video failed to load, use image fallback
+  if (isVideoBanner.value && !bannerVideoError.value) {
+    // Remove background image when video is present
+    return {
+      backgroundImage: 'none',
+    }
+  }
   return {
     backgroundImage: `linear-gradient(135deg, rgba(17, 24, 39, 0.4), rgba(8, 47, 73, 0.6)), url('${heroImage.value}')`,
   }
 })
+
+const shouldShowVideo = computed(() => {
+  return isVideoBanner.value && videoUrl.value && !bannerVideoError.value
+})
+
+// Reset video error when banner changes
+watch(
+  () => bannerUrl.value,
+  () => {
+    bannerVideoError.value = false
+  },
+)
 
 const monthLabels = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12']
 const getEventDay = (event: EventItem) => {
@@ -427,18 +493,20 @@ const investorHighlights = [
 
 <template>
   <MasterLayout>
-    <section class="hero" :style="heroStyle">
+    <section class="hero" :class="{ 'hero--video': shouldShowVideo }" :style="heroStyle">
       <video
-        v-if="isVideoBanner && bannerUrl"
-        :src="bannerUrl"
+        v-if="shouldShowVideo"
+        :src="videoUrl"
         autoplay
         muted
         loop
         playsinline
+        preload="auto"
         class="hero-video"
+        @error="handleVideoError"
       ></video>
-      <div class="hero-overlay"></div>
-      <div class="hero-content">
+      <div v-if="!shouldShowVideo" class="hero-overlay"></div>
+      <div v-if="!shouldShowVideo" class="hero-content">
         <p class="eyebrow">2025 Studio Showcase</p>
         <h1>KHOA KIẾN TRÚC</h1>
         <p class="hero-lede">
@@ -640,7 +708,7 @@ const investorHighlights = [
             </ul>
           </div>
           <div class="widget">
-            <p class="widget-title">Nhà đầu tư</p>
+            <p class="widget-title">Sản phẩm</p>
             <ul class="investor-list">
               <li v-for="investor in investorHighlights" :key="investor.name">
                 <h4>{{ investor.name }}</h4>

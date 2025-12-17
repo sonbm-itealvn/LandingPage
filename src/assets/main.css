@@ -342,6 +342,11 @@ body {
   overflow: hidden;
 }
 
+.hero--video {
+  padding: 0;
+  display: block;
+}
+
 .hero-video {
   position: absolute;
   top: 0;
@@ -350,6 +355,7 @@ body {
   height: 100%;
   object-fit: cover;
   z-index: 0;
+  pointer-events: none;
 }
 
 .hero-overlay {
