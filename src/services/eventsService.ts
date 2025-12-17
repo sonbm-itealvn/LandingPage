@@ -8,6 +8,9 @@ export type EventItem = {
   description?: string
   short_description?: string
   summary?: string
+  banner_url?: string
+  content?: string
+  status?: string
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
@@ -86,5 +89,14 @@ export const fetchEvents = async (limit = 3): Promise<EventItem[]> => {
       ? (data as { data?: EventItem[] }).data ?? []
       : []
   return events.slice(0, limit)
+}
+
+export const fetchEventById = async (id: string | number): Promise<EventItem | null> => {
+  const response = await fetch(`${EVENTS_ENDPOINT}/${id}`)
+  if (!response.ok) {
+    throw new Error('Không thể tải chi tiết sự kiện.')
+  }
+  const data = await response.json()
+  return (data ?? null) as EventItem | null
 }
 

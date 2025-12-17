@@ -467,7 +467,7 @@ const investorHighlights = [
           <div v-else-if="!highlightPosts.length" class="section-one__state">Chưa có tin nổi bật.</div>
           <div v-else class="highlight-grid">
             <article
-              v-for="(post, idx) in highlightPosts.slice(0, 4)"
+              v-for="(post, idx) in highlightPosts.slice(0, 6)"
               :key="post.id ?? post.slug ?? post.title ?? idx"
               class="highlight-card"
             >

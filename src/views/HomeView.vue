@@ -217,15 +217,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   stopAutoSlide()
+  stopCountdown()
 })
-
-watch(
-  () => events.value.length,
-  () => {
-    currentEventIndex.value = 0
-    startAutoSlide()
-  },
-)
 
 const latestHero = computed(() => latestPosts.value[0])
 const latestRest = computed(() => latestPosts.value.slice(1, 5))
@@ -237,12 +230,91 @@ const sliderStyle = computed(() => ({
 }))
 const highlightColumns = computed(() => [highlightPosts.value.slice(0, 3), highlightPosts.value.slice(3, 6)])
 
+const countdown = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+let countdownInterval: ReturnType<typeof setInterval> | null = null
+
+const updateCountdown = () => {
+  if (!eventHero.value?.end_time) {
+    countdown.value = { days: 0, hours: 0, minutes: 0, seconds: 0 }
+    return
+  }
+
+  const now = new Date().getTime()
+  const endTime = new Date(eventHero.value.end_time).getTime()
+  const distance = endTime - now
+
+  if (distance < 0) {
+    countdown.value = { days: 0, hours: 0, minutes: 0, seconds: 0 }
+    return
+  }
+
+  countdown.value = {
+    days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+    minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+    seconds: Math.floor((distance % (1000 * 60)) / 1000),
+  }
+}
+
+const startCountdown = () => {
+  if (countdownInterval) clearInterval(countdownInterval)
+  updateCountdown()
+  countdownInterval = setInterval(updateCountdown, 1000)
+}
+
+const stopCountdown = () => {
+  if (countdownInterval) {
+    clearInterval(countdownInterval)
+    countdownInterval = null
+  }
+}
+
+const eventBannerStyle = computed(() => {
+  if (!eventHero.value?.banner_url) return {}
+  return {
+    backgroundImage: `linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)), url('${eventHero.value.banner_url}')`,
+  }
+})
+
+watch(
+  () => events.value.length,
+  () => {
+    currentEventIndex.value = 0
+    startAutoSlide()
+    startCountdown()
+  },
+)
+
+watch(
+  () => eventHero.value?.end_time,
+  () => {
+    startCountdown()
+  },
+)
+
 const DEFAULT_HERO_IMAGE =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80'
-const heroImage = computed(() => banners.value[0]?.image || DEFAULT_HERO_IMAGE)
-const heroStyle = computed(() => ({
-  backgroundImage: `linear-gradient(135deg, rgba(17, 24, 39, 0.4), rgba(8, 47, 73, 0.6)), url('${heroImage.value}')`,
-}))
+
+const isVideoUrl = (url: string): boolean => {
+  if (!url) return false
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']
+  const urlLower = url.toLowerCase()
+  return videoExtensions.some((ext) => urlLower.includes(ext)) || urlLower.includes('video')
+}
+
+const currentBanner = computed(() => banners.value[0])
+const bannerUrl = computed(() => {
+  if (!currentBanner.value) return null
+  return currentBanner.value.image_url || currentBanner.value.image || null
+})
+const heroImage = computed(() => bannerUrl.value || DEFAULT_HERO_IMAGE)
+const isVideoBanner = computed(() => bannerUrl.value ? isVideoUrl(bannerUrl.value) : false)
+const heroStyle = computed(() => {
+  if (isVideoBanner.value) return {}
+  return {
+    backgroundImage: `linear-gradient(135deg, rgba(17, 24, 39, 0.4), rgba(8, 47, 73, 0.6)), url('${heroImage.value}')`,
+  }
+})
 
 const monthLabels = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12']
 const getEventDay = (event: EventItem) => {
@@ -356,28 +428,40 @@ const investorHighlights = [
 <template>
   <MasterLayout>
     <section class="hero" :style="heroStyle">
-      <p class="eyebrow">2025 Studio Showcase</p>
-      <h1>KHOA KIẾN TRÚC</h1>
-      <p class="hero-lede">
-        Cập nhật đồ án, workshop và sự kiện nội bộ của khoa. Khám phá những câu chuyện kiến trúc mới nhất ngay tại
-        campus Hà Nội.
-      </p>
-      <div class="hero-actions">
-        <button class="primary-btn">Truy cập ngay</button>
-        <button class="ghost-btn">Lịch sự kiện</button>
-      </div>
-      <div class="hero-meta">
-        <div>
-          <p>05</p>
-          <span>Workshop tuần này</span>
+      <video
+        v-if="isVideoBanner && bannerUrl"
+        :src="bannerUrl"
+        autoplay
+        muted
+        loop
+        playsinline
+        class="hero-video"
+      ></video>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <p class="eyebrow">2025 Studio Showcase</p>
+        <h1>KHOA KIẾN TRÚC</h1>
+        <p class="hero-lede">
+          Cập nhật đồ án, workshop và sự kiện nội bộ của khoa. Khám phá những câu chuyện kiến trúc mới nhất ngay tại
+          campus Hà Nội.
+        </p>
+        <div class="hero-actions">
+          <button class="primary-btn">Truy cập ngay</button>
+          <button class="ghost-btn">Lịch sự kiện</button>
         </div>
-        <div>
-          <p>24</p>
-          <span>Đồ án trưng bày</span>
-        </div>
-        <div>
-          <p>08</p>
-          <span>Đối tác quốc tế</span>
+        <div class="hero-meta">
+          <div>
+            <p>05</p>
+            <span>Workshop tuần này</span>
+          </div>
+          <div>
+            <p>24</p>
+            <span>Đồ án trưng bày</span>
+          </div>
+          <div>
+            <p>08</p>
+            <span>Đối tác quốc tế</span>
+          </div>
         </div>
       </div>
     </section>
@@ -431,82 +515,78 @@ const investorHighlights = [
     </section>
 
     <section v-if="showEventSection" id="section-2" class="event-banner">
-      <header class="section-header">
-        <div>
-          <p class="section-tag">Sự kiện</p>
-        </div>
-        <RouterLink class="see-more-btn" to="/hoat-dong-khoa">Xem thêm</RouterLink>
-      </header>
       <div v-if="eventsError" class="event-state event-state--error">
         {{ eventsError }}
       </div>
       <div v-else-if="isEventsLoading" class="event-state">Đang tải sự kiện...</div>
       <div v-else-if="!events.length" class="event-state">Chưa có sự kiện nào.</div>
       <template v-else>
-        <div
-          class="event-slider"
-          @mouseenter="stopAutoSlide()"
-          @mouseleave="startAutoSlide()"
+        <RouterLink
+          v-if="eventHero"
+          :to="eventHero.id ? `/events/${eventHero.id}` : '/hoat-dong-khoa'"
+          class="event-banner-full-link"
         >
-          <div class="event-slider__track" :style="sliderStyle">
-            <article
-              v-for="(event, idx) in events"
-              :key="event.id ?? event.title ?? idx"
-              class="event-slide"
-            >
-              <div class="event-slide__inner">
-                <div class="event-datecard">
-                  <p class="event-datecard__status">{{ getEventStatus(event) }}</p>
-                  <div class="event-datecard__day">{{ getEventDay(event) }}</div>
-                  <p class="event-datecard__month">{{ getEventMonth(event) }}</p>
-                  <span class="event-datecard__time">{{ formatEventTimeRange(event) }}</span>
-                </div>
-                <div class="event-content">
-                  <div class="event-chip">Sự kiện</div>
-                  <h3 class="clamp-2">{{ getEventTitle(event) }}</h3>
-                  <p class="event-subtitle">{{ getEventSubtitle(event) }}</p>
-                  <div class="event-meta">
-                    <div>
-                      <span class="event-meta__label">Thời gian</span>
-                      <p class="event-meta__value">{{ formatEventDateRange(event) }}</p>
-                      <p class="event-meta__value event-meta__value--muted">{{ formatEventTimeRange(event) }}</p>
-                    </div>
-                    <div>
-                      <span class="event-meta__label">Địa điểm</span>
-                      <p class="event-meta__value">{{ event.location || 'Đang cập nhật' }}</p>
-                    </div>
+          <article class="event-banner-full" :style="eventBannerStyle">
+          <div class="event-banner-full__wrapper">
+            <div class="event-banner-full__right">
+              <div class="event-countdown">
+                <div class="countdown-label">Còn lại</div>
+                <div class="countdown-grid">
+                  <div class="countdown-item">
+                    <span class="countdown-value">{{ String(countdown.days).padStart(2, '0') }}</span>
+                    <span class="countdown-unit">Ngày</span>
+                  </div>
+                  <div class="countdown-separator">:</div>
+                  <div class="countdown-item">
+                    <span class="countdown-value">{{ String(countdown.hours).padStart(2, '0') }}</span>
+                    <span class="countdown-unit">Giờ</span>
+                  </div>
+                  <div class="countdown-separator">:</div>
+                  <div class="countdown-item">
+                    <span class="countdown-value">{{ String(countdown.minutes).padStart(2, '0') }}</span>
+                    <span class="countdown-unit">Phút</span>
+                  </div>
+                  <div class="countdown-separator">:</div>
+                  <div class="countdown-item">
+                    <span class="countdown-value">{{ String(countdown.seconds).padStart(2, '0') }}</span>
+                    <span class="countdown-unit">Giây</span>
                   </div>
                 </div>
               </div>
-            </article>
-          </div>
-
-          <div v-if="hasMultipleEvents" class="event-slider__controls">
-            <button class="event-btn" type="button" @click="prevEvent">‹</button>
-            <div class="event-dots">
-              <button
-                v-for="(event, idx) in events"
-                :key="event.id ?? event.title ?? idx"
-                type="button"
-                class="event-dot"
-                :class="{ 'event-dot--active': idx === currentEventIndex }"
-                @click="goToEvent(idx)"
-                :aria-label="`Chuyển đến sự kiện ${idx + 1}`"
-              ></button>
+              <div class="event-info-panel">
+                <div class="event-info-item">
+                  <div class="event-info-icon">🕐</div>
+                  <div class="event-info-content">
+                    <div class="event-info-label">Thời gian</div>
+                    <div class="event-info-value">{{ formatEventDateRange(eventHero) }}</div>
+                    <div class="event-info-value event-info-value--time">{{ formatEventTimeRange(eventHero) }}</div>
+                  </div>
+                </div>
+                <div class="event-info-divider"></div>
+                <div class="event-info-item">
+                  <div class="event-info-icon">📍</div>
+                  <div class="event-info-content">
+                    <div class="event-info-label">Địa điểm</div>
+                    <div class="event-info-value">{{ eventHero.location || 'Đang cập nhật' }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <button class="event-btn" type="button" @click="nextEvent">›</button>
           </div>
-        </div>
+        </article>
+        </RouterLink>
       </template>
     </section>
 
     <section id="section-3" class="news-section">
-      <header class="section-header">
-        <div>
+      <header class="section-header section-header--dual">
+        <div class="section-header__left">
           <p class="section-tag">Tin tức</p>
-          <h2>Tin nổi bật</h2>
+          <RouterLink class="see-more-btn" to="/tin-tuc">Xem thêm</RouterLink>
         </div>
-        <RouterLink class="see-more-btn" to="/tin-tuc">Xem thêm</RouterLink>
+        <div class="section-header__right">
+          <p class="section-tag">Hợp tác kết nối</p>
+        </div>
       </header>
       <div class="news-columns">
         <div class="news-stream">
@@ -517,7 +597,7 @@ const investorHighlights = [
           <div v-else-if="!highlightPosts.length" class="section-one__state">Chưa có tin nổi bật.</div>
           <div v-else class="highlight-grid">
             <article
-              v-for="(post, idx) in highlightPosts.slice(0, 4)"
+              v-for="(post, idx) in highlightPosts.slice(0, 6)"
               :key="post.id ?? post.slug ?? post.title ?? idx"
               class="highlight-card"
             >

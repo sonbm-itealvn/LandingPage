@@ -40,6 +40,11 @@ const router = createRouter({
       component: () => import('../views/PostView.vue'),
     },
     {
+      path: '/events/:id',
+      name: 'event-detail',
+      component: () => import('../views/EventView.vue'),
+    },
+    {
       path: '/about',
       name: 'about',
       // route level code-splitting
