@@ -19,6 +19,8 @@ import {
   getPostShortDescription,
   getPostImage,
   fetchLatestPostsByCategory,
+  fetchSpecialPostsLatest,
+  fetchSpecialPostsRandom,
   type Post,
 } from '../services/postsService'
 import {
@@ -62,11 +64,15 @@ const youtubeVideos = ref<YoutubeVideo[]>([])
 const isVideosLoading = ref(true)
 const videoError = ref('')
 
+const collaborationPosts = ref<Post[]>([])
+const isCollaborationLoading = ref(true)
+const collaborationError = ref('')
+
 const loadLatestPosts = async () => {
   isLatestLoading.value = true
   latestError.value = ''
   try {
-    latestPosts.value = await fetchLatestPosts(5)
+    latestPosts.value = await fetchSpecialPostsLatest('hoat-dong-khoa', 5)
   } catch (error) {
     latestError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải bài viết.'
     latestPosts.value = []
@@ -79,7 +85,7 @@ const loadHighlightPosts = async () => {
   isHighlightLoading.value = true
   highlightError.value = ''
   try {
-    highlightPosts.value = await fetchLatestPostsByCategory('hoat-dong-khoa', 6)
+    highlightPosts.value = await fetchSpecialPostsRandom('hoat-dong-khoa', 6)
   } catch (error) {
     highlightError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải tin nổi bật.'
     highlightPosts.value = []
@@ -92,7 +98,7 @@ const loadAnnouncements = async () => {
   isAnnouncementsLoading.value = true
   announcementsError.value = ''
   try {
-    announcementPosts.value = await fetchLatestPostsByCategory('thong-bao', 5)
+    announcementPosts.value = await fetchSpecialPostsLatest('thong-bao', 5)
   } catch (error) {
     announcementsError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thông báo.'
     announcementPosts.value = []
@@ -168,6 +174,18 @@ const loadEvents = async () => {
   }
 }
 
+const loadCollaborationPosts = async () => {
+  isCollaborationLoading.value = true
+  collaborationError.value = ''
+  try {
+    collaborationPosts.value = await fetchSpecialPostsLatest('hop-tac', 10)
+  } catch (error) {
+    collaborationError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải hợp tác kết nối.'
+    collaborationPosts.value = []
+  } finally {
+    isCollaborationLoading.value = false
+  }
+}
 
 onMounted(() => {
   loadLatestPosts()
@@ -178,6 +196,7 @@ onMounted(() => {
   loadSandboxPosts()
   loadReferencePosts()
   loadYoutubeVideos()
+  loadCollaborationPosts()
 })
 
 onBeforeUnmount(() => {
@@ -453,12 +472,24 @@ const investorHighlights = [
         </div>
         <aside class="news-side">
           <div class="widget">
-            <p class="widget-title">Đối tác quốc tế</p>
-            <ul class="partner-list">
-              <li v-for="partner in internationalPartners" :key="partner.name">
-                <h4>{{ partner.name }}</h4>
-                <p>{{ partner.program }}</p>
-                <span>{{ partner.location }}</span>
+            <p class="widget-title">Hợp tác kết nối</p>
+            <div v-if="collaborationError" class="section-one__state section-one__state--error">
+              {{ collaborationError }}
+            </div>
+            <div v-else-if="isCollaborationLoading" class="section-one__state">Đang tải...</div>
+            <div v-else-if="!collaborationPosts.length" class="section-one__state">Chưa có dữ liệu.</div>
+            <ul v-else class="collaboration-list">
+              <li v-for="post in collaborationPosts" :key="post.id ?? post.slug ?? post.title">
+                <RouterLink :to="getPostLink(post)" class="collaboration-item">
+                  <img 
+                    v-if="post.thumbnail_url" 
+                    :src="post.thumbnail_url" 
+                    :alt="post.title || 'Hợp tác kết nối'" 
+                    class="collaboration-item__thumb"
+                    loading="lazy"
+                  />
+                  <h4 class="collaboration-item__title">{{ post.title || 'Hợp tác kết nối' }}</h4>
+                </RouterLink>
               </li>
             </ul>
           </div>

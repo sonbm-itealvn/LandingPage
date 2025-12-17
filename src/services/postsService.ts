@@ -119,3 +119,59 @@ export const fetchPostById = async (id: string | number): Promise<Post | null> =
   return (data ?? null) as Post | null
 }
 
+export const fetchSpecialPostsLatest = async (category: string, limit = 5): Promise<Post[]> => {
+  const response = await fetch(`${API_BASE_URL}/special-posts/${category}/latest?limit=${limit}`)
+  if (!response.ok) {
+    throw new Error(`Không thể tải bài viết mới nhất của ${category}.`)
+  }
+  const data = await response.json()
+  const posts = Array.isArray(data)
+    ? data
+    : Array.isArray((data as { data?: unknown[] })?.data)
+      ? (data as { data?: Post[] }).data ?? []
+      : []
+  return posts.slice(0, limit)
+}
+
+export const fetchSpecialPostsRandom = async (category: string, limit = 6): Promise<Post[]> => {
+  const response = await fetch(`${API_BASE_URL}/special-posts/${category}/random?limit=${limit}`)
+  if (!response.ok) {
+    throw new Error(`Không thể tải bài viết ngẫu nhiên của ${category}.`)
+  }
+  const data = await response.json()
+  const posts = Array.isArray(data)
+    ? data
+    : Array.isArray((data as { data?: unknown[] })?.data)
+      ? (data as { data?: Post[] }).data ?? []
+      : []
+  return posts.slice(0, limit)
+}
+
+export const fetchSpecialPostsAll = async (
+  category: string,
+  page = 1,
+  limit = 20,
+  status = 'published'
+): Promise<Post[]> => {
+  const response = await fetch(
+    `${API_BASE_URL}/special-posts/${category}/all?page=${page}&limit=${limit}&status=${status}`
+  )
+  if (!response.ok) {
+    throw new Error(`Không thể tải danh sách bài viết của ${category}.`)
+  }
+  const data = await response.json()
+  // Check if response is array directly
+  if (Array.isArray(data)) {
+    return data
+  }
+  // Check if response has 'posts' key
+  if (data && typeof data === 'object' && 'posts' in data && Array.isArray(data.posts)) {
+    return data.posts as Post[]
+  }
+  // Check if response has 'data' key
+  if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
+    return data.data as Post[]
+  }
+  return []
+}
+

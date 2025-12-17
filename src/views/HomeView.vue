@@ -20,6 +20,8 @@ import {
   getPostShortDescription,
   getPostImage,
   fetchLatestPostsByCategory,
+  fetchSpecialPostsLatest,
+  fetchSpecialPostsRandom,
   type Post,
 } from '../services/postsService'
 import {
@@ -69,11 +71,15 @@ const videoError = ref('')
 const banners = ref<Banner[]>([])
 const bannersError = ref('')
 
+const collaborationPosts = ref<Post[]>([])
+const isCollaborationLoading = ref(true)
+const collaborationError = ref('')
+
 const loadLatestPosts = async () => {
   isLatestLoading.value = true
   latestError.value = ''
   try {
-    latestPosts.value = await fetchLatestPosts(5)
+    latestPosts.value = await fetchSpecialPostsLatest('hoat-dong-khoa', 5)
   } catch (error) {
     latestError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải bài viết.'
     latestPosts.value = []
@@ -86,7 +92,7 @@ const loadHighlightPosts = async () => {
   isHighlightLoading.value = true
   highlightError.value = ''
   try {
-    highlightPosts.value = await fetchLatestPostsByCategory('hoat-dong-khoa', 6)
+    highlightPosts.value = await fetchSpecialPostsRandom('hoat-dong-khoa', 6)
   } catch (error) {
     highlightError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải tin nổi bật.'
     highlightPosts.value = []
@@ -99,7 +105,7 @@ const loadAnnouncements = async () => {
   isAnnouncementsLoading.value = true
   announcementsError.value = ''
   try {
-    announcementPosts.value = await fetchLatestPostsByCategory('thong-bao', 5)
+    announcementPosts.value = await fetchSpecialPostsLatest('thong-bao', 5)
   } catch (error) {
     announcementsError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thông báo.'
     announcementPosts.value = []
@@ -185,6 +191,19 @@ const loadBanners = async () => {
   }
 }
 
+const loadCollaborationPosts = async () => {
+  isCollaborationLoading.value = true
+  collaborationError.value = ''
+  try {
+    collaborationPosts.value = await fetchSpecialPostsLatest('hop-tac', 10)
+  } catch (error) {
+    collaborationError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải hợp tác kết nối.'
+    collaborationPosts.value = []
+  } finally {
+    isCollaborationLoading.value = false
+  }
+}
+
 const autoSlideDelayMs = 5000
 let autoSlideTimer: ReturnType<typeof setInterval> | null = null
 
@@ -213,6 +232,7 @@ onMounted(() => {
   loadReferencePosts()
   loadYoutubeVideos()
   loadBanners()
+  loadCollaborationPosts()
 })
 
 onBeforeUnmount(() => {
@@ -312,6 +332,7 @@ const isVideoUrl = (url: string): boolean => {
   
   // Check file extension (remove query params first)
   const urlWithoutQuery = urlLower.split('?')[0]
+  if (!urlWithoutQuery) return false
   const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv', '.m4v', '.flv', '.wmv']
   const hasVideoExtension = videoExtensions.some((ext) => urlWithoutQuery.endsWith(ext))
   
@@ -331,7 +352,7 @@ const convertVideoUrl = (url: string): string => {
     if (url.includes('/upload/')) {
       // Split at /upload/ to insert transformation
       const parts = url.split('/upload/')
-      if (parts.length === 2) {
+      if (parts.length === 2 && parts[0] && parts[1]) {
         // Add format transformation: f_mp4 for mp4 format
         return `${parts[0]}/upload/f_mp4/${parts[1].replace(/\.(avi|mov|mkv|wmv|flv|webm)$/i, '.mp4')}`
       }
@@ -495,8 +516,8 @@ const investorHighlights = [
   <MasterLayout>
     <section class="hero" :class="{ 'hero--video': shouldShowVideo }" :style="heroStyle">
       <video
-        v-if="shouldShowVideo"
-        :src="videoUrl"
+        v-if="shouldShowVideo && videoUrl"
+        :src="videoUrl || undefined"
         autoplay
         muted
         loop
@@ -698,12 +719,24 @@ const investorHighlights = [
         </div>
         <aside class="news-side">
           <div class="widget">
-            <p class="widget-title">Đối tác quốc tế</p>
-            <ul class="partner-list">
-              <li v-for="partner in internationalPartners" :key="partner.name">
-                <h4>{{ partner.name }}</h4>
-                <p>{{ partner.program }}</p>
-                <span>{{ partner.location }}</span>
+            <p class="widget-title">Hợp tác kết nối</p>
+            <div v-if="collaborationError" class="section-one__state section-one__state--error">
+              {{ collaborationError }}
+            </div>
+            <div v-else-if="isCollaborationLoading" class="section-one__state">Đang tải...</div>
+            <div v-else-if="!collaborationPosts.length" class="section-one__state">Chưa có dữ liệu.</div>
+            <ul v-else class="collaboration-list">
+              <li v-for="post in collaborationPosts" :key="post.id ?? post.slug ?? post.title">
+                <RouterLink :to="getPostLink(post)" class="collaboration-item">
+                  <img 
+                    v-if="post.thumbnail_url" 
+                    :src="post.thumbnail_url" 
+                    :alt="post.title || 'Hợp tác kết nối'" 
+                    class="collaboration-item__thumb"
+                    loading="lazy"
+                  />
+                  <h4 class="collaboration-item__title">{{ post.title || 'Hợp tác kết nối' }}</h4>
+                </RouterLink>
               </li>
             </ul>
           </div>
