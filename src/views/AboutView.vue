@@ -212,9 +212,8 @@ watch(
   },
 )
 
-const sectionOneHero = computed(() => latestPosts.value[0])
-const sectionOneLeftPosts = computed(() => latestPosts.value.slice(1, 3))
-const sectionOneRightPosts = computed(() => latestPosts.value.slice(3, 5))
+const latestHero = computed(() => latestPosts.value[0])
+const latestRest = computed(() => latestPosts.value.slice(1, 5))
 const eventHero = computed(() => events.value[0])
 const showEventSection = computed(() => isEventsLoading.value || events.value.length > 0)
 const hasMultipleEvents = computed(() => events.value.length > 1)
@@ -413,50 +412,41 @@ const investorHighlights = [
       <div v-else-if="!latestPosts.length" class="section-one__state">
         Chưa có bài viết mới, quay lại sau nhé!
       </div>
-      <div v-else class="section-one__frame">
-        <div class="section-one__col">
-          <article
-            v-for="post in sectionOneLeftPosts"
-            :key="post.id ?? post.slug ?? post.title"
-            class="section-one__card"
-          >
-            <RouterLink :to="getPostLink(post)">
-              <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
-            </RouterLink>
-            <div>
-              <h3 class="clamp-2">{{ post.title || 'Bài viết mới' }}</h3>
+      <div v-else class="latest-board">
+        <article v-if="latestHero" class="latest-board__item latest-board__item--hero">
+          <RouterLink :to="getPostLink(latestHero)" class="latest-board__link">
+            <div class="latest-board__thumb">
+              <img :src="getPostImage(latestHero)" :alt="latestHero.title || getPostCategory(latestHero)" loading="lazy" />
             </div>
-          </article>
-        </div>
-
-        <article v-if="sectionOneHero" class="section-one__hero">
-          <RouterLink :to="getPostLink(sectionOneHero)">
-            <img
-              :src="getPostImage(sectionOneHero)"
-              :alt="sectionOneHero.title || getPostCategory(sectionOneHero)"
-              loading="lazy"
-            />
+            <div class="latest-board__body">
+              <p class="latest-board__meta">
+                {{ getPostCategory(latestHero) }}<span v-if="getPostDate(latestHero)"> · {{ getPostDate(latestHero) }}</span>
+              </p>
+              <h3 class="clamp-2">{{ latestHero.title || 'Bài viết mới' }}</h3>
+              <p class="latest-board__excerpt">
+                {{ getPostExcerpt(latestHero, 150) || 'Bài viết mới nhất từ khoa.' }}
+              </p>
+            </div>
           </RouterLink>
-          <div>
-            <h3 class="clamp-2">{{ sectionOneHero.title || 'Bài viết mới' }}</h3>
-            <p>{{ getPostExcerpt(sectionOneHero) || 'Bài viết mới nhất từ khoa.' }}</p>
-          </div>
         </article>
 
-        <div class="section-one__col section-one__col--right">
-          <article
-            v-for="post in sectionOneRightPosts"
-            :key="post.id ?? post.slug ?? post.title"
-            class="section-one__card"
-          >
-            <RouterLink :to="getPostLink(post)">
+        <article
+          v-for="(post, idx) in latestRest"
+          :key="post.id ?? post.slug ?? post.title ?? idx"
+          :class="['latest-board__item', `latest-board__item--s${idx + 1}`]"
+        >
+          <RouterLink :to="getPostLink(post)" class="latest-board__link">
+            <div class="latest-board__thumb latest-board__thumb--small">
               <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
-            </RouterLink>
-            <div>
+            </div>
+            <div class="latest-board__body">
+              <p class="latest-board__meta">
+                {{ getPostCategory(post) }}<span v-if="getPostDate(post)"> · {{ getPostDate(post) }}</span>
+              </p>
               <h3 class="clamp-2">{{ post.title || 'Bài viết mới' }}</h3>
             </div>
-          </article>
-        </div>
+          </RouterLink>
+        </article>
       </div>
     </section>
 
@@ -475,17 +465,23 @@ const investorHighlights = [
           </div>
           <div v-else-if="isHighlightLoading" class="section-one__state">Đang tải tin nổi bật...</div>
           <div v-else-if="!highlightPosts.length" class="section-one__state">Chưa có tin nổi bật.</div>
-          <div v-else class="news-grid">
-            <div v-for="(col, cIdx) in highlightColumns" :key="`col-${cIdx}`" class="news-grid__col">
-              <article v-for="post in col" :key="post.id ?? post.slug ?? post.title" class="news-card">
-                <RouterLink :to="getPostLink(post)" class="news-card__media">
+          <div v-else class="highlight-grid">
+            <article
+              v-for="(post, idx) in highlightPosts.slice(0, 4)"
+              :key="post.id ?? post.slug ?? post.title ?? idx"
+              class="highlight-card"
+            >
+              <RouterLink :to="getPostLink(post)" class="highlight-card__link">
+                <div class="highlight-card__thumb">
                   <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
-                </RouterLink>
-                <div>
-                  <h3 class="clamp-2">{{ post.title || 'Tin mới' }}</h3>
                 </div>
-              </article>
-            </div>
+                <div class="highlight-card__body">
+                  <span class="highlight-card__category">{{ getPostCategory(post) }}</span>
+                  <h3 class="highlight-card__title clamp-2">{{ post.title || 'Tin mới' }}</h3>
+                  <span class="highlight-card__cta">Đọc bài →</span>
+                </div>
+              </RouterLink>
+            </article>
           </div>
 
           <div id="faculty-announcements" class="widget widget--stacked announcements-widget">
