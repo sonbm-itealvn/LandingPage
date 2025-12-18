@@ -82,13 +82,13 @@ export const getPostAuthor = (post: Post) => {
   return 'Khoa Kiến Trúc'
 }
 
-export const getPostAvatar = (post: Post) => {
+export const getPostAvatar = (post: Post): string | undefined => {
   if (post.avatar) return post.avatar
   if (post.author_avatar) return post.author_avatar
   if (post.author && typeof post.author === 'object' && 'avatar' in post.author && post.author.avatar) {
     return post.author.avatar as string
   }
-  return null
+  return undefined
 }
 
 export const fetchLatestPosts = async (limit = 5): Promise<Post[]> => {

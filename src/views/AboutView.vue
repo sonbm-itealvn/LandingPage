@@ -253,12 +253,12 @@ const setupScrollAnimations = () => {
 
   // Observe individual items
   document.querySelectorAll('.flow-item-child').forEach((el) => {
-    itemObserver.observe(el)
+    itemObserver?.observe(el)
   })
 
   // Observe info cards
   document.querySelectorAll('.info-card').forEach((el) => {
-    infoCardObserver.observe(el)
+    infoCardObserver?.observe(el)
   })
 
   // Observe flow line path for animation
