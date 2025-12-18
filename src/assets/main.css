@@ -345,6 +345,8 @@ body {
 .hero--video {
   padding: 0;
   display: block;
+  min-height: 500px;
+  aspect-ratio: 16 / 9;
 }
 
 .hero-video {
@@ -356,6 +358,7 @@ body {
   object-fit: cover;
   z-index: 0;
   pointer-events: none;
+  display: block;
 }
 
 .hero-overlay {
@@ -373,6 +376,13 @@ body {
   z-index: 2;
   display: grid;
   gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .hero--video {
+    min-height: 400px;
+    aspect-ratio: 16 / 9;
+  }
 }
 
 .eyebrow {
