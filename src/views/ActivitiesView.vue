@@ -450,7 +450,6 @@ const investorHighlights = [
                 <div class="highlight-card__body">
                   <span class="highlight-card__category">{{ getPostCategory(post) }}</span>
                   <h3 class="highlight-card__title clamp-2">{{ post.title || 'Tin mới' }}</h3>
-                  <span class="highlight-card__cta">Đọc bài →</span>
                 </div>
               </RouterLink>
             </article>
@@ -465,7 +464,9 @@ const investorHighlights = [
             <div v-else-if="!announcementPosts.length" class="section-one__state">Chưa có thông báo.</div>
             <ul v-else>
               <li v-for="post in announcementPosts" :key="post.id ?? post.slug ?? post.title">
-                <h4>{{ post.title || 'Thông báo mới' }}</h4>
+                <RouterLink :to="getPostLink(post)" class="announcement-item">
+                  <h4>{{ post.title || 'Thông báo mới' }}</h4>
+                </RouterLink>
               </li>
             </ul>
           </div>
@@ -558,14 +559,16 @@ const investorHighlights = [
                 :key="post.slug ?? post.title"
                 class="sandbox-card"
               >
-                <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__media">
-                  <img :src="post.image" :alt="post.title" loading="lazy" />
+                <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link-wrapper">
+                  <div class="sandbox-card__media">
+                    <img :src="post.image" :alt="post.title" loading="lazy" />
+                  </div>
+                  <div class="sandbox-card__body">
+                    <!-- <p class="sandbox-card__category">Bài mới</p> -->
+                    <h3 class="clamp-2">{{ post.title }}</h3>
+                    <!-- <span class="sandbox-card__link">Đọc bài →</span> -->
+                  </div>
                 </a>
-                <div class="sandbox-card__body">
-                  <p class="sandbox-card__category">Bài mới</p>
-                  <h3 class="clamp-2">{{ post.title }}</h3>
-                  <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link">Đọc bài →</a>
-                </div>
               </article>
             </div>
           </div>
@@ -577,14 +580,16 @@ const investorHighlights = [
                 :key="post.slug ?? post.title"
                 class="sandbox-card"
               >
-                <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__media">
-                  <img :src="post.image" :alt="post.title" loading="lazy" />
+                <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link-wrapper">
+                  <div class="sandbox-card__media">
+                    <img :src="post.image" :alt="post.title" loading="lazy" />
+                  </div>
+                  <div class="sandbox-card__body">
+                    <!-- <p class="sandbox-card__category">Chuyên mục</p> -->
+                    <h3 class="clamp-2">{{ post.title }}</h3>
+                    <!-- <span class="sandbox-card__link">Đọc bài →</span> -->
+                  </div>
                 </a>
-                <div class="sandbox-card__body">
-                  <p class="sandbox-card__category">Chuyên mục</p>
-                  <h3 class="clamp-2">{{ post.title }}</h3>
-                  <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link">Đọc bài →</a>
-                </div>
               </article>
             </div>
           </div>

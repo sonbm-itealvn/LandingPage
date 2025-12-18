@@ -19,6 +19,10 @@ export type Post = {
   featuredImage?: string
   coverImage?: string
   heroImage?: string
+  author?: string | { name?: string; avatar?: string }
+  author_name?: string
+  author_avatar?: string
+  avatar?: string
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
@@ -67,6 +71,24 @@ export const getPostDate = (post: Post) => {
   } catch {
     return raw
   }
+}
+
+export const getPostAuthor = (post: Post) => {
+  if (typeof post.author === 'string' && post.author.trim()) return post.author
+  if (post.author && typeof post.author === 'object' && 'name' in post.author && post.author.name) {
+    return post.author.name as string
+  }
+  if (post.author_name) return post.author_name
+  return 'Khoa Kiến Trúc'
+}
+
+export const getPostAvatar = (post: Post) => {
+  if (post.avatar) return post.avatar
+  if (post.author_avatar) return post.author_avatar
+  if (post.author && typeof post.author === 'object' && 'avatar' in post.author && post.author.avatar) {
+    return post.author.avatar as string
+  }
+  return null
 }
 
 export const fetchLatestPosts = async (limit = 5): Promise<Post[]> => {
