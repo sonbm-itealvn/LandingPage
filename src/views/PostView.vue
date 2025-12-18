@@ -107,8 +107,8 @@ const loadPrevNextPosts = async () => {
     )
     
     if (currentIndex !== -1) {
-      prevPost.value = currentIndex > 0 ? allPosts[currentIndex - 1] : null
-      nextPost.value = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null
+      prevPost.value = currentIndex > 0 ? (allPosts[currentIndex - 1] ?? null) : null
+      nextPost.value = currentIndex < allPosts.length - 1 ? (allPosts[currentIndex + 1] ?? null) : null
     } else {
       prevPost.value = null
       nextPost.value = null
