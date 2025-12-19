@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import headerLogo from '../../logo_khoa-kien-truc-edit2024.png'
 const utilityLinks = [
-  { label: 'Quảng Cáo', href: '#' },
-  { label: 'Gửi Bài', href: '#' },
-  { label: 'Danh Bạ', href: '#' },
+  { label: 'Quảng cáo', href: '#' },
+  { label: 'Gửi bài', href: '#' },
+  { label: 'Danh bạ', href: '#' },
 ]
 
 const socialLinks = [
@@ -103,11 +102,13 @@ const activityCards = [
       <div class="brand-band" id="top">
         <div class="brand-identity">
           <div class="logo-panel">
-            <img :src="headerLogo" alt="Khoa Kiến Trúc logo" loading="lazy" />
+            <RouterLink to="/">
+              <img src="/LOGO KKT 2025.svg" alt="Khoa Kiến Trúc logo" loading="lazy" />
+            </RouterLink>
           </div>
           <div class="brand-copy">
-            <p class="brand-label">Faculty of Architecture</p>
-            <p class="brand-subline">Khoa Kiến Trúc · Hanoi Architectural University</p>
+              <p class="brand-label">Faculty of Architecture</p>
+              <p class="brand-subline">Khoa Kiến Trúc · Hanoi Architectural University</p>
           </div>
         </div>
         <form class="header-search" role="search" @submit.prevent>

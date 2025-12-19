@@ -3,7 +3,7 @@ import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import MasterLayout from '../components/MasterLayout.vue'
-import { fetchPostById, getPostDate, getPostAuthor, getPostAvatar, getPostImage, getPostCategory, type Post, fetchSpecialPostsLatest, fetchLatestPosts, fetchAllPosts } from '../services/postsService'
+import { fetchPostById, getPostDate, getPostAuthor, getPostAvatar, getPostImage, getPostCategory, type Post, fetchSpecialPostsLatest, fetchLatestPosts, fetchAllPosts, fetchSpecialPostsRandom } from '../services/postsService'
 
 const route = useRoute()
 const post = ref<Post | null>(null)
@@ -79,13 +79,14 @@ const loadRelatedPosts = async () => {
   isRelatedLoading.value = true
   relatedError.value = ''
   try {
-    const allPosts = await fetchLatestPosts(10)
-    // Filter out current post
+    // Fetch random posts from hoat-dong-su-kien category
+    const randomPosts = await fetchSpecialPostsRandom('hoat-dong-su-kien', 4)
+    // Filter out current post if it exists in the results
     const currentPostId = post.value?.id
     const currentPostSlug = post.value?.slug
-    relatedPosts.value = allPosts
+    relatedPosts.value = randomPosts
       .filter((p) => p.id !== currentPostId && p.slug !== currentPostSlug)
-      .slice(0, 6) // Take 6 posts for 3x2 grid
+      .slice(0, 4) // Take 4 posts for horizontal layout
   } catch (error) {
     relatedError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải bài viết liên quan.'
     relatedPosts.value = []
@@ -125,11 +126,12 @@ const loadSidebarRelatedPosts = async () => {
   isSidebarRelatedLoading.value = true
   sidebarRelatedError.value = ''
   try {
-    const allPosts = await fetchLatestPosts(10)
-    // Filter out current post
+    // Fetch random posts from hoat-dong-su-kien category
+    const randomPosts = await fetchSpecialPostsRandom('hoat-dong-su-kien', 5)
+    // Filter out current post if it exists in the results
     const currentPostId = post.value?.id
     const currentPostSlug = post.value?.slug
-    sidebarRelatedPosts.value = allPosts
+    sidebarRelatedPosts.value = randomPosts
       .filter((p) => p.id !== currentPostId && p.slug !== currentPostSlug)
       .slice(0, 5) // Take 5 posts for sidebar
   } catch (error) {
@@ -157,7 +159,144 @@ watch(
   },
 )
 
-const renderBody = (value?: string) => value ?? ''
+// Function to convert video URLs to embed code
+const convertVideoLinksToEmbed = (html: string): string => {
+  if (!html) return ''
+  
+  let processedHtml = html
+  
+  // Don't skip - we need to process even if there are existing embeds
+  // This allows processing of new links that haven't been converted yet
+  
+  // Extract YouTube video ID from various URL formats
+  const extractYouTubeId = (url: string): string | null => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/.*[?&]v=([a-zA-Z0-9_-]{11})/
+    ]
+    for (const pattern of patterns) {
+      const match = url.match(pattern)
+      if (match) return match[1]
+    }
+    return null
+  }
+  
+  // Extract Vimeo video ID
+  const extractVimeoId = (url: string): string | null => {
+    const match = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/)
+    return match ? match[1] : null
+  }
+  
+  // Helper function to create YouTube embed iframe
+  const createYouTubeEmbed = (videoId: string) => {
+    return `<div class="video-embed"><iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}?rel=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div>`
+  }
+  
+  // Helper function to create Vimeo embed iframe
+  const createVimeoEmbed = (videoId: string) => {
+    return `<div class="video-embed"><iframe src="https://player.vimeo.com/video/${videoId}?title=0&byline=0&portrait=0" width="560" height="315" title="Vimeo video player" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`
+  }
+  
+  // First, handle links in <a> tags (YouTube)
+  processedHtml = processedHtml.replace(/<a[^>]*href=["']([^"']*youtube[^"']*)["'][^>]*>.*?<\/a>/gi, (match, url) => {
+    const videoId = extractYouTubeId(url)
+    if (videoId) {
+      return createYouTubeEmbed(videoId)
+    }
+    return match
+  })
+  
+  // Handle links in <a> tags (Vimeo)
+  processedHtml = processedHtml.replace(/<a[^>]*href=["']([^"']*vimeo[^"']*)["'][^>]*>.*?<\/a>/gi, (match, url) => {
+    const videoId = extractVimeoId(url)
+    if (videoId) {
+      return createVimeoEmbed(videoId)
+    }
+    return match
+  })
+  
+  // Handle standalone YouTube URLs (not in <a> tags, not in attributes)
+  processedHtml = processedHtml.replace(/(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11}))/g, (match, url, videoId, offset) => {
+    // Check if URL is inside an HTML attribute (href, src, etc.)
+    const beforeMatch = processedHtml.substring(Math.max(0, offset - 20), offset)
+    const afterMatch = processedHtml.substring(offset, offset + match.length + 20)
+    
+    // Skip if inside href=", src=", or other attributes
+    if (beforeMatch.match(/href\s*=\s*["']?$/) || beforeMatch.match(/src\s*=\s*["']?$/)) {
+      return match
+    }
+    
+    // Skip if already processed
+    if (afterMatch.includes('video-embed') || beforeMatch.includes('video-embed')) {
+      return match
+    }
+    
+    return createYouTubeEmbed(videoId)
+  })
+  
+  // Handle standalone Vimeo URLs (not in <a> tags, not in attributes)
+  processedHtml = processedHtml.replace(/(https?:\/\/(?:www\.)?vimeo\.com\/(\d+))/g, (match, url, videoId, offset) => {
+    // Check if URL is inside an HTML attribute (href, src, etc.)
+    const beforeMatch = processedHtml.substring(Math.max(0, offset - 20), offset)
+    const afterMatch = processedHtml.substring(offset, offset + match.length + 20)
+    
+    // Skip if inside href=", src=", or other attributes
+    if (beforeMatch.match(/href\s*=\s*["']?$/) || beforeMatch.match(/src\s*=\s*["']?$/)) {
+      return match
+    }
+    
+    // Skip if already processed
+    if (afterMatch.includes('video-embed') || beforeMatch.includes('video-embed')) {
+      return match
+    }
+    
+    return createVimeoEmbed(videoId)
+  })
+  
+  // Handle existing <video> tags that might have YouTube/Vimeo URLs in src
+  processedHtml = processedHtml.replace(/<video[^>]*src=["']([^"']*(?:youtube|vimeo)[^"']*)["'][^>]*>.*?<\/video>/gi, (match, url) => {
+    const youtubeId = extractYouTubeId(url)
+    if (youtubeId) {
+      return createYouTubeEmbed(youtubeId)
+    }
+    const vimeoId = extractVimeoId(url)
+    if (vimeoId) {
+      return createVimeoEmbed(vimeoId)
+    }
+    return match
+  })
+  
+  // Also check for video tags with source tags inside
+  processedHtml = processedHtml.replace(/<video[^>]*>.*?<source[^>]*src=["']([^"']*(?:youtube|vimeo)[^"']*)["'][^>]*>.*?<\/video>/gi, (match, url) => {
+    const youtubeId = extractYouTubeId(url)
+    if (youtubeId) {
+      return createYouTubeEmbed(youtubeId)
+    }
+    const vimeoId = extractVimeoId(url)
+    if (vimeoId) {
+      return createVimeoEmbed(vimeoId)
+    }
+    return match
+  })
+  
+  // Ensure we don't process URLs that are already in iframe src attributes
+  // This prevents double processing
+  processedHtml = processedHtml.replace(/<iframe[^>]*src=["']([^"']*(?:youtube|vimeo)[^"']*)["'][^>]*>/gi, (match) => {
+    // If iframe already exists and has proper src, keep it as is
+    if (match.includes('youtube.com/embed') || match.includes('player.vimeo.com')) {
+      // Wrap in video-embed div if not already wrapped
+      return match
+    }
+    return match
+  })
+  
+  return processedHtml
+}
+
+const renderBody = (value?: string) => {
+  if (!value) return ''
+  return convertVideoLinksToEmbed(value)
+}
 </script>
 
 <template>
