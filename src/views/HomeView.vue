@@ -4,7 +4,8 @@ import MasterLayout from '../components/MasterLayout.vue'
 import { RouterLink } from 'vue-router'
 import { fetchBanners, type Banner } from '../services/bannersService'
 import {
-  fetchLatestYoutubeVideos,
+  getRandomYoutubeVideos,
+  refreshYoutubeVideos,
   formatVideoDate,
   getThumbnail,
   getVideoChannel,
@@ -178,15 +179,44 @@ const loadReferencePosts = async () => {
   }
 }
 
-const loadYoutubeVideos = async () => {
+const loadYoutubeVideos = async (forceRefresh = false) => {
   isVideosLoading.value = true
   videoError.value = ''
   try {
-    youtubeVideos.value = await fetchLatestYoutubeVideos()
+    if (forceRefresh) {
+      // Force refresh: xóa cache và fetch mới
+      await refreshYoutubeVideos()
+      youtubeVideos.value = await getRandomYoutubeVideos(3)
+    } else {
+      // Lấy random 3 video (từ cache nếu có, mỗi lần reload sẽ random lại)
+      youtubeVideos.value = await getRandomYoutubeVideos(3)
+    }
   } catch (error) {
     videoError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải dữ liệu.'
   } finally {
     isVideosLoading.value = false
+  }
+}
+
+// Auto refresh sau 10 phút
+let videoRefreshInterval: ReturnType<typeof setInterval> | null = null
+
+const startVideoAutoRefresh = () => {
+  // Xóa interval cũ nếu có
+  if (videoRefreshInterval) {
+    clearInterval(videoRefreshInterval)
+  }
+  
+  // Set interval 10 phút
+  videoRefreshInterval = setInterval(() => {
+    loadYoutubeVideos(true) // Force refresh
+  }, 10 * 60 * 1000) // 10 phút
+}
+
+const stopVideoAutoRefresh = () => {
+  if (videoRefreshInterval) {
+    clearInterval(videoRefreshInterval)
+    videoRefreshInterval = null
   }
 }
 
@@ -252,14 +282,17 @@ onMounted(() => {
   loadTechPosts()
   loadSandboxPosts()
   loadReferencePosts()
-  loadYoutubeVideos()
+  // Mỗi lần reload sẽ random lại 3 video từ cache
+  loadYoutubeVideos(false) // false = không force refresh, chỉ random lại
   loadBanners()
   loadCollaborationPosts()
+  startVideoAutoRefresh() // Bắt đầu auto refresh sau 10 phút
 })
 
 onBeforeUnmount(() => {
   stopAutoSlide()
   stopCountdown()
+  stopVideoAutoRefresh() // Dừng auto refresh khi unmount
 })
 
 const latestHero = computed(() => latestPosts.value[0])
