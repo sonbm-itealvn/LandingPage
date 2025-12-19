@@ -1651,6 +1651,27 @@ const cleanupScrollAnimations = () => {
 }
 
 @media (max-width: 768px) {
+  .flow-section {
+    padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 3vw, 2rem);
+  }
+
+  .flow-hero {
+    padding-top: clamp(3rem, 8vw, 5rem);
+    padding-bottom: clamp(2rem, 5vw, 3rem);
+  }
+
+  .flow-hero__title {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+  }
+
+  .flow-hero__description {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+  }
+
+  .flow-section__title {
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+  }
+
   .info-cards-container {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -1658,8 +1679,8 @@ const cleanupScrollAnimations = () => {
 
   .info-card {
     flex-direction: column !important;
-    padding: 2rem;
-    gap: 1.5rem;
+    padding: 1.75rem;
+    gap: 1.25rem;
   }
 
   .info-card__icon-wrapper {
@@ -1667,22 +1688,55 @@ const cleanupScrollAnimations = () => {
   }
 
   .info-card__icon-circle {
-    width: 80px;
-    height: 80px;
+    width: 75px;
+    height: 75px;
   }
 
   .info-card__icon {
-    font-size: 2.4rem;
+    font-size: 2.2rem;
   }
 
   .info-card__title {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     text-align: center;
   }
 
   .info-card__description {
     text-align: center;
+    font-size: 0.95rem;
+  }
+
+  .flow-stat-card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .flow-stat-card__icon {
+    font-size: 2.5rem;
+  }
+
+  .flow-stat-card__number {
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+  }
+
+  .flow-stat-card__label {
+    font-size: 0.9rem;
+  }
+
+  .flow-timeline__content {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .flow-timeline__year {
+    font-size: 1.3rem;
+  }
+
+  .flow-timeline__title {
     font-size: 1rem;
+  }
+
+  .flow-timeline__description {
+    font-size: 0.85rem;
   }
 }
 
@@ -1755,9 +1809,78 @@ const cleanupScrollAnimations = () => {
 }
 
 @media (max-width: 600px) {
+  .flow-section {
+    padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 2.5vw, 1.5rem);
+  }
+
+  .flow-hero {
+    padding-top: clamp(2.5rem, 7vw, 4rem);
+  }
+
+  .flow-hero__title {
+    font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+    margin-bottom: 1rem;
+  }
+
+  .flow-hero__description {
+    font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+    margin-bottom: 2rem;
+  }
+
+  .flow-section__header {
+    margin-bottom: 2rem;
+  }
+
+  .flow-section__title {
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+  }
+
+  .flow-section__tag {
+    font-size: 0.7rem;
+  }
+
+  .info-card {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .info-card__icon-circle {
+    width: 70px;
+    height: 70px;
+  }
+
+  .info-card__icon {
+    font-size: 2rem;
+  }
+
+  .info-card__title {
+    font-size: 1.2rem;
+  }
+
+  .info-card__description {
+    font-size: 0.9rem;
+  }
+
+  .info-card__tag {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
   .flow-facilities__grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  .flow-facility-card {
+    padding: 1.5rem;
+  }
+
+  .flow-facility-card__title {
+    font-size: 1.1rem;
+  }
+
+  .flow-facility-card__description {
+    font-size: 0.9rem;
   }
 
   .flow-courses__stream {
@@ -1765,18 +1888,62 @@ const cleanupScrollAnimations = () => {
     gap: 1rem;
   }
 
+  .flow-course-card {
+    padding: 1.5rem;
+  }
+
+  .flow-course-card__icon {
+    font-size: 2.5rem;
+  }
+
+  .flow-course-card__title {
+    font-size: 1.2rem;
+  }
+
+  .flow-course-card__description {
+    font-size: 0.9rem;
+  }
+
   .flow-research__grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
 
+  .flow-research-card {
+    padding: 1.5rem;
+  }
+
+  .flow-research-card__title {
+    font-size: 1.1rem;
+  }
+
+  .flow-research-card__description {
+    font-size: 0.9rem;
+  }
+
   .flow-team-card {
-    padding: 2rem 1.5rem;
+    padding: 1.75rem 1.25rem;
+  }
+
+  .flow-team-card__main-number {
+    font-size: clamp(3rem, 5vw, 4rem);
+  }
+
+  .flow-team-card__main-label {
+    font-size: 1.5rem;
+  }
+
+  .flow-team-card__number {
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+  }
+
+  .flow-team-card__label {
+    font-size: 0.9rem;
   }
 
   .flow-team-card__breakdown {
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
   }
 
   .flow-team-card__breakdown-divider {
@@ -1793,6 +1960,128 @@ const cleanupScrollAnimations = () => {
 
   .flow-team-card__breakdown-item {
     min-width: 100%;
+  }
+
+  .flow-stat-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .flow-stat-card__icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .flow-stat-card__number {
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+  }
+
+  .flow-stat-card__label {
+    font-size: 0.85rem;
+  }
+
+  .flow-timeline {
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+  }
+
+  .flow-timeline__content {
+    padding: 0.85rem;
+  }
+
+  .flow-timeline__year {
+    font-size: 1.2rem;
+  }
+
+  .flow-timeline__title {
+    font-size: 0.95rem;
+  }
+
+  .flow-timeline__description {
+    font-size: 0.8rem;
+  }
+
+  .flow-partnership-section {
+    padding: 1.5rem;
+  }
+
+  .flow-partnership-section__title {
+    font-size: 1.3rem;
+  }
+
+  .flow-partnership-item {
+    padding: 0.85rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .flow-tech-badge {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .flow-section {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .flow-hero {
+    padding-top: 2rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .flow-hero__title {
+    font-size: 1.5rem;
+  }
+
+  .flow-hero__description {
+    font-size: 0.9rem;
+  }
+
+  .flow-section__title {
+    font-size: 1.2rem;
+  }
+
+  .info-card {
+    padding: 1.25rem;
+  }
+
+  .info-card__icon-circle {
+    width: 65px;
+    height: 65px;
+  }
+
+  .info-card__icon {
+    font-size: 1.8rem;
+  }
+
+  .info-card__title {
+    font-size: 1.1rem;
+  }
+
+  .info-card__description {
+    font-size: 0.85rem;
+  }
+
+  .flow-team-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .flow-team-card__main-number {
+    font-size: 2.8rem;
+  }
+
+  .flow-team-card__main-label {
+    font-size: 1.3rem;
+  }
+
+  .flow-stat-card {
+    padding: 1rem 0.85rem;
+  }
+
+  .flow-stat-card__number {
+    font-size: 1.8rem;
   }
 }
 </style>

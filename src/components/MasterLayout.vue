@@ -29,10 +29,17 @@ const route = useRoute()
 
 const toggleNav = () => {
   isNavOpen.value = !isNavOpen.value
+  // Lock body scroll when menu is open
+  if (isNavOpen.value) {
+    document.body.classList.add('menu-open')
+  } else {
+    document.body.classList.remove('menu-open')
+  }
 }
 
 const closeNav = () => {
   isNavOpen.value = false
+  document.body.classList.remove('menu-open')
 }
 
 watch(
