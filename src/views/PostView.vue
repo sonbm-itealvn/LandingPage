@@ -176,7 +176,7 @@ const convertVideoLinksToEmbed = (html: string): string => {
     ]
     for (const pattern of patterns) {
       const match = url.match(pattern)
-      if (match) return match[1]
+      if (match && match[1]) return match[1]
     }
     return null
   }
@@ -184,7 +184,7 @@ const convertVideoLinksToEmbed = (html: string): string => {
   // Extract Vimeo video ID
   const extractVimeoId = (url: string): string | null => {
     const match = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/)
-    return match ? match[1] : null
+    return match && match[1] ? match[1] : null
   }
   
   // Helper function to create YouTube embed iframe
