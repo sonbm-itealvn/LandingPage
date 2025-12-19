@@ -59,6 +59,28 @@ const sandboxRowOne = ref<SandboxPost[]>([])
 const sandboxRowTwo = ref<SandboxPost[]>([])
 const isSandboxLoading = ref(true)
 const sandboxError = ref('')
+const sandboxCurrentIndex = ref(0)
+const isSliding = ref(false)
+
+const allSandboxPosts = computed(() => [...sandboxRowOne.value, ...sandboxRowTwo.value])
+
+const goToSandboxSlide = (direction: 'prev' | 'next' | number) => {
+  if (isSliding.value || !allSandboxPosts.value.length) return
+  
+  isSliding.value = true
+  
+  if (typeof direction === 'number') {
+    sandboxCurrentIndex.value = direction
+  } else if (direction === 'next') {
+    sandboxCurrentIndex.value = (sandboxCurrentIndex.value + 1) % allSandboxPosts.value.length
+  } else {
+    sandboxCurrentIndex.value = (sandboxCurrentIndex.value - 1 + allSandboxPosts.value.length) % allSandboxPosts.value.length
+  }
+  
+  setTimeout(() => {
+    isSliding.value = false
+  }, 400)
+}
 
 const referencePosts = ref<Post[]>([])
 const isReferenceLoading = ref(true)
@@ -799,11 +821,12 @@ const investorHighlights = [
         <div v-else-if="isSandboxLoading" class="section-one__state">Đang tải bài Sandbox...</div>
         <div v-else-if="!sandboxRowOne.length && !sandboxRowTwo.length" class="section-one__state">Chưa có bài Sandbox.</div>
         <template v-else>
-          <div class="sandbox-row">
+          <!-- Desktop/Tablet: Grid Layout -->
+          <div class="sandbox-grid-container">
             <div class="sandbox-grid">
               <article
-                v-for="post in sandboxRowOne"
-                :key="post.slug ?? post.title"
+                v-for="(post, index) in allSandboxPosts"
+                :key="post.slug ?? post.title ?? index"
                 class="sandbox-card"
               >
                 <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link-wrapper">
@@ -811,33 +834,68 @@ const investorHighlights = [
                     <img :src="post.image" :alt="post.title" loading="lazy" />
                   </div>
                   <div class="sandbox-card__body">
-                    <!-- <p class="sandbox-card__category">Bài mới</p> -->
+                    <p v-if="index >= sandboxRowOne.length" class="sandbox-card__category">Chuyên mục</p>
                     <h3 class="clamp-2">{{ post.title }}</h3>
-                    <!-- <span class="sandbox-card__link">Đọc bài →</span> -->
+                    <span v-if="index >= sandboxRowOne.length" class="sandbox-card__link">Đọc bài →</span>
                   </div>
                 </a>
               </article>
             </div>
           </div>
 
-          <div class="sandbox-row">
-            <div class="sandbox-grid">
-              <article
-                v-for="post in sandboxRowTwo"
-                :key="post.slug ?? post.title"
-                class="sandbox-card"
+          <!-- Mobile: Slider Layout -->
+          <div class="sandbox-slider-container">
+            <div class="sandbox-slider-wrapper">
+              <div class="sandbox-slider" :class="{ 'sandbox-slider--sliding': isSliding }" :style="{ transform: `translateX(-${sandboxCurrentIndex * 100}%)` }">
+                <div
+                  v-for="(post, index) in allSandboxPosts"
+                  :key="`slider-${post.slug ?? post.title ?? index}`"
+                  class="sandbox-slide"
+                >
+                  <article class="sandbox-card sandbox-card--slider">
+                    <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link-wrapper">
+                      <div class="sandbox-card__media">
+                        <img :src="post.image" :alt="post.title" loading="lazy" />
+                      </div>
+                      <div class="sandbox-card__body">
+                        <p v-if="index >= sandboxRowOne.length" class="sandbox-card__category">Chuyên mục</p>
+                        <h3 class="clamp-2">{{ post.title }}</h3>
+                        <span v-if="index >= sandboxRowOne.length" class="sandbox-card__link">Đọc bài →</span>
+                      </div>
+                    </a>
+                  </article>
+                </div>
+              </div>
+            </div>
+            <div class="sandbox-slider-controls">
+              <button
+                class="sandbox-slider-btn sandbox-slider-btn--prev"
+                @click="goToSandboxSlide('prev')"
+                aria-label="Bài trước"
               >
-                <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link-wrapper">
-                  <div class="sandbox-card__media">
-                    <img :src="post.image" :alt="post.title" loading="lazy" />
-                  </div>
-                  <div class="sandbox-card__body">
-                    <p class="sandbox-card__category">Chuyên mục</p>
-                    <h3 class="clamp-2">{{ post.title }}</h3>
-                    <span class="sandbox-card__link">Đọc bài →</span>
-                  </div>
-                </a>
-              </article>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <div class="sandbox-slider-dots">
+                <button
+                  v-for="(_, index) in allSandboxPosts"
+                  :key="`dot-${index}`"
+                  class="sandbox-slider-dot"
+                  :class="{ 'sandbox-slider-dot--active': sandboxCurrentIndex === index }"
+                  @click="goToSandboxSlide(index)"
+                  :aria-label="`Đi tới slide ${index + 1}`"
+                ></button>
+              </div>
+              <button
+                class="sandbox-slider-btn sandbox-slider-btn--next"
+                @click="goToSandboxSlide('next')"
+                aria-label="Bài tiếp"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
             </div>
           </div>
         </template>
