@@ -155,36 +155,67 @@ const activityCards = [
       <slot />
     </main>
 
-    <footer class="page-footer">
-      <div class="footer-info-sections">
-        <section id="about" class="info-grid-section">
-          <div>
-            <p class="section-tag">About</p>
+    <footer class="faculty-footer">
+      <div class="faculty-footer__container">
+        <div class="faculty-footer__header">
+          <div class="faculty-footer__logo">
+            <div class="faculty-footer__logo-icon">
+              <img src="/LOGO KKT 2025.svg" alt="Khoa Kiến Trúc Logo" />
+            </div>
+            <div class="faculty-footer__logo-text">
+              <span>FACULTY OF</span>
+              <span>ARCHITECTURE</span>
+            </div>
           </div>
-          <div class="info-grid">
-            <article v-for="card in aboutCards" :key="card.title" class="info-card" :style="{ backgroundColor: card.color }">
-              <h3>{{ card.title }}</h3>
-              <p>{{ card.body }}</p>
-            </article>
+          <div class="faculty-footer__social">
+            <a
+              v-for="social in socialLinks"
+              :key="social.label"
+              :href="social.href"
+              class="faculty-footer__social-icon"
+              :class="`faculty-footer__social-icon--${social.modifier}`"
+              :aria-label="social.label"
+              target="_blank"
+              rel="noopener"
+            >
+              <svg v-if="social.modifier === 'facebook'" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22 12.07C22 6.56 17.52 2 12 2S2 6.56 2 12.07c0 4.99 3.66 9.13 8.44 9.93v-7.03H8.08v-2.9h2.36V9.77c0-2.33 1.38-3.62 3.5-3.62.7 0 1.43.12 2.1.23v2.32h-1.18c-1.15 0-1.52.72-1.52 1.46v1.75h2.59l-.41 2.9h-2.18V22c4.78-.8 8.44-4.94 8.44-9.93Z" />
+              </svg>
+              <svg v-else-if="social.modifier === 'youtube'" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 8.5c-.1-1.4-1.2-2.5-2.6-2.6C16.47 5.67 12 5.67 12 5.67s-4.47 0-6.4.23C4.2 6.01 3.1 7.1 3 8.5c-.23 1.94-.23 4.5-.23 4.5s0 2.56.23 4.5c.1 1.4 1.2 2.5 2.6 2.6 1.93.23 6.4.23 6.4.23s4.47 0 6.4-.23c1.4-.1 2.5-1.2 2.6-2.6.23-1.94.23-4.5.23-4.5s0-2.56-.23-4.5ZM10 15.25v-5.5L15.2 12 10 15.25Z" />
+              </svg>
+              <svg v-else viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21.75 8.59a5.65 5.65 0 0 1-4.67-2.4v8.44a4.65 4.65 0 1 1-4.63-4.63c.2 0 .4.01.6.03v2.5a2.12 2.12 0 1 0 1.5 2.02V2.75h3.04a5.62 5.62 0 0 0 4.16 2.1Z" />
+              </svg>
+            </a>
           </div>
-        </section>
+        </div>
 
-        <section class="info-grid-section">
-          <div>
-            <p class="section-tag">Hoạt động</p>
-          </div>
-          <div class="info-grid">
-            <article v-for="card in activityCards" :key="card.title" class="info-card" :style="{ backgroundColor: card.color }">
-              <h3>{{ card.title }}</h3>
-              <p>{{ card.body }}</p>
-            </article>
-          </div>
-        </section>
-      </div>
+        <nav class="faculty-footer__nav">
+          <RouterLink to="/about" class="faculty-footer__nav-link">Giới thiệu</RouterLink>
+          <RouterLink to="/dao-tao" class="faculty-footer__nav-link">Đào tạo</RouterLink>
+          <RouterLink to="/hoat-dong-khoa" class="faculty-footer__nav-link">Hoạt động khoa</RouterLink>
+          <RouterLink to="/thong-bao" class="faculty-footer__nav-link">Thông báo</RouterLink>
+          <RouterLink to="/hop-tac-ket-noi" class="faculty-footer__nav-link">Hợp tác - kết nối</RouterLink>
+        </nav>
 
-      <div class="footer-meta">
-        <p>© 2025 Hanoi Architectural University - Faculty of Architecture.</p>
-        <p>144 Xuân Thuỷ, Cầu Giấy, Hà Nội - Email: studio@hau.edu.vn</p>
+        <div class="faculty-footer__content">
+          <div class="faculty-footer__description">
+            <p>
+              Khoa Kiến trúc là một trong những khoa đầu tiên được thành lập cùng với trường đại học Kiến trúc từ năm 1961, trải qua hơn 60 năm hoạt động và đào tạo, đóng vai trò hạt nhân trong việc hình thành và phát triển nguồn nhân lực kiến trúc tại Việt Nam.
+            </p>
+          </div>
+          <div class="faculty-footer__contact">
+            <p>Số 129, đường Trần Phú, phường Hà Đông, Thành phố Hà Nội, Việt Nam</p>
+            <p>Liên hệ: faculty@archihau.edu.vn</p>
+            <p>Hotline:</p>
+          </div>
+        </div>
+
+        <div class="faculty-footer__copyright">
+          <p>2025 Bản quyền thuộc về Khoa Kiến trúc</p>
+          <p class="faculty-footer__copyright-fit">Copyright by FIT-HAU</p>
+        </div>
       </div>
     </footer>
   </div>
