@@ -16,7 +16,7 @@ const socialLinks = [
 const siteNavLinks = [
   { label: 'Trang Chủ', to: '/' },
   { label: 'Giới thiệu', to: '/about' },
-  { label: 'Đào tạo', to: '/dao-tao', locked: true },
+  { label: 'Đào tạo', to: '/dao-tao' },
   { label: 'Hoạt động khoa', to: '/hoat-dong-khoa' },
   { label: 'Hợp tác - Kết nối', to: '/hop-tac-ket-noi', locked: true },
   { label: 'Tin tức', to: '/tin-tuc' },

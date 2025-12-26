@@ -197,3 +197,60 @@ export const fetchSpecialPostsAll = async (
   return []
 }
 
+// Fetch posts by category with pagination
+export const fetchPostsByCategory = async (
+  categorySlug: string,
+  page = 1,
+  limit = 10,
+  status?: string
+): Promise<Post[]> => {
+  let url = `${API_BASE_URL}/posts/category/${categorySlug}?page=${page}&limit=${limit}`
+  if (status) {
+    url += `&status=${status}`
+  }
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Không thể tải bài viết từ danh mục ${categorySlug}.`)
+  }
+  const data = await response.json()
+  // Check if response is array directly
+  if (Array.isArray(data)) {
+    return data
+  }
+  // Check if response has 'posts' key
+  if (data && typeof data === 'object' && 'posts' in data && Array.isArray(data.posts)) {
+    return data.posts as Post[]
+  }
+  // Check if response has 'data' key
+  if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
+    return data.data as Post[]
+  }
+  return []
+}
+
+// Fetch all posts by category (no pagination)
+export const fetchAllPostsByCategory = async (categorySlug: string, status?: string): Promise<Post[]> => {
+  let url = `${API_BASE_URL}/posts/category/${categorySlug}/all`
+  if (status) {
+    url += `?status=${status}`
+  }
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Không thể tải tất cả bài viết từ danh mục ${categorySlug}.`)
+  }
+  const data = await response.json()
+  // Check if response is array directly
+  if (Array.isArray(data)) {
+    return data
+  }
+  // Check if response has 'posts' key
+  if (data && typeof data === 'object' && 'posts' in data && Array.isArray(data.posts)) {
+    return data.posts as Post[]
+  }
+  // Check if response has 'data' key
+  if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
+    return data.data as Post[]
+  }
+  return []
+}
+
