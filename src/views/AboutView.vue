@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import MasterLayout from '../components/MasterLayout.vue'
 
 // Lịch sử Khoa Kiến trúc - Chi tiết theo ảnh
@@ -77,85 +76,120 @@ const handleImageError = (event: Event) => {
 
 <template>
   <MasterLayout>
-    <div class="about-page">
-      <!-- Header Section với Logo và Tên trường - Nền xanh đậm -->
-      <section class="about-header">
-        <div class="about-header__container">
-          <div class="about-header__logo-section">
-            <div class="about-header__logo-circle">
-              <div class="about-header__logo">
-                <img src="/LOGO KKT 2025.svg" alt="Logo Khoa Kiến trúc" />
+    <div class="min-h-screen bg-white">
+      <!-- Header Section với Logo và Tên trường - Thanh xanh bên trái -->
+      <section class="relative bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto relative min-h-[280px] sm:min-h-[320px] lg:min-h-[380px] flex flex-col lg:flex-row">
+          <!-- Thanh xanh đậm bên trái -->
+          <div class="absolute left-0 top-0 bottom-0 w-40 sm:w-48 lg:w-56 xl:w-64 bg-hau-blue z-10"></div>
+          
+          <!-- Logo Section -->
+          <div class="relative z-20 w-40 sm:w-48 lg:w-56 xl:w-64 flex-shrink-0 py-10 sm:py-12 lg:py-16 xl:py-20 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center gap-4 sm:gap-5 lg:gap-6">
+            <div class="flex flex-col items-center gap-3 sm:gap-4">
+              <div class="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 xl:w-36 xl:h-36 rounded-full bg-white flex items-center justify-center p-3 sm:p-4 lg:p-5 xl:p-6 shadow-strong transition-transform duration-300 hover:scale-105">
+                <img 
+                  src="/LOGO KKT 2025.svg" 
+                  alt="Logo Khoa Kiến trúc" 
+                  class="w-full h-full object-contain" 
+                />
               </div>
-              <div class="about-header__logo-anniversary">
-                <div class="about-header__years">1969 2019</div>
-                <div class="about-header__anniversary-text">50 NĂM KIẾN TRÚC</div>
+              <div class="text-center text-white space-y-0.5">
+                <div class="text-xs sm:text-sm lg:text-base font-semibold leading-tight">1969 2019</div>
+                <div class="text-[10px] sm:text-xs lg:text-sm font-medium uppercase tracking-widest leading-tight">50 NĂM KIẾN TRÚC</div>
               </div>
             </div>
           </div>
-          <div class="about-header__text">
-            <h1 class="about-header__university">TRƯỜNG ĐH KIẾN TRÚC HÀ NỘI</h1>
-            <h2 class="about-header__faculty">KHOA KIẾN TRÚC</h2>
+
+          <!-- Text Section -->
+          <div class="relative z-10 flex-1 py-10 sm:py-12 lg:py-16 xl:py-20 px-4 sm:px-6 lg:px-10 xl:px-16 flex flex-col justify-center">
+            <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-[2.5rem] font-bold text-hau-blue mb-2 sm:mb-3 uppercase tracking-wide leading-tight">
+              TRƯỜNG ĐH KIẾN TRÚC HÀ NỘI
+            </h1>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-[3.5rem] font-black text-hau-blue uppercase tracking-wider leading-tight">
+              KHOA KIẾN TRÚC
+            </h2>
           </div>
         </div>
       </section>
 
       <!-- Phần Giới thiệu Chính - Nền trắng -->
-      <section class="about-intro">
-        <div class="about-intro__container">
-          <div class="about-intro__content">
-            <p class="about-intro__paragraph">
+      <section class="bg-white py-10 sm:py-12 lg:py-16 xl:py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+          <div class="space-y-5 sm:space-y-6 lg:space-y-8">
+            <p class="text-sm sm:text-base lg:text-lg xl:text-xl leading-relaxed text-gray-800 text-justify">
               Trải qua gần 60 năm xây dựng và trưởng thành từ năm 1961 đến nay, Khoa Kiến trúc - Trường Đại học Kiến trúc Hà Nội đã đào tạo được hơn 8.000 kiến trúc sư, 660 thạc sĩ và 42 tiến sĩ kiến trúc. Nhiều cựu sinh viên đã trở thành những nhà khoa học GS, PGS, là lãnh đạo ở các cơ quan quản lý Nhà nước và quản lý các doanh nghiệp. Nhiều thế hệ kiến trúc sư có uy tín đã được ghi nhận qua các giải thưởng kiến trúc trong nước và quốc tế của UIA, ARCASIA, giải thưởng nhà nước và giải thưởng kiến trúc quốc gia. Sinh viên Khoa Kiến trúc tích cực tham gia các hoạt động: Văn nghệ, thể thao, các hoạt động tình nguyện, hoạt động xã hội,... với sự nhiệt huyết, đam mê sáng tạo và để lại ấn tượng sâu sắc với các giải thưởng Loa Thành, Futurarc, Insee, AYDA,... Tập thể Khoa, các Bộ môn và nhiều cá nhân đã được tặng thưởng Huân Chương lao động của Nhà nước, bằng khen của Chính phủ và Bộ Xây dựng. Nhờ sự kế thừa và phát huy từ các thế hệ đi trước, Khoa Kiến trúc - Trường Đại học Kiến trúc Hà Nội luôn khẳng định được vị thế là cơ sở đào tạo kiến trúc sư hàng đầu của cả nước.
             </p>
 
-            <p class="about-intro__section-content">
-              <strong>NGUỒN NHÂN LỰC</strong> đội ngũ giảng viên cơ hữu và kiêm nhiệm của Khoa bao gồm 78 giảng viên trong đó có 3 PGS, 18 TS và 60 ThS, KTS. Các giảng viên được biên chế tại 8 Bộ môn giảng dạy các môn lý thuyết, thực hành và đồ án chuyên ngành. Văn phòng Khoa gồm 2 giảng viên là trợ lý cho Ban chủ nhiệm khoa về công tác đào tạo, quản lý sinh viên và 3 thư ký Khoa.
-            </p>
+            <div class="pt-2 sm:pt-3">
+              <p class="text-sm sm:text-base lg:text-lg xl:text-xl leading-relaxed text-gray-800 text-justify">
+                <strong class="font-bold uppercase tracking-wide text-hau-blue block mb-1 sm:mb-2">NGUỒN NHÂN LỰC</strong>
+                <span class="block">Đội ngũ giảng viên cơ hữu và kiêm nhiệm của Khoa bao gồm 78 giảng viên trong đó có 3 PGS, 18 TS và 60 ThS, KTS. Các giảng viên được biên chế tại 8 Bộ môn giảng dạy các môn lý thuyết, thực hành và đồ án chuyên ngành. Văn phòng Khoa gồm 2 giảng viên là trợ lý cho Ban chủ nhiệm khoa về công tác đào tạo, quản lý sinh viên và 3 thư ký Khoa.</span>
+              </p>
+            </div>
 
-            <p class="about-intro__section-content">
-              <strong>CƠ SỞ VẬT CHẤT</strong> Văn phòng Khoa Kiến trúc, 7 phòng ban, 7 xưởng thực hành kiến trúc, phòng tư liệu phục vụ nghiên cứu và học tập, phòng trưng bày kiến trúc và mỹ thuật.
-            </p>
+            <div class="pt-2 sm:pt-3">
+              <p class="text-sm sm:text-base lg:text-lg xl:text-xl leading-relaxed text-gray-800 text-justify">
+                <strong class="font-bold uppercase tracking-wide text-hau-blue block mb-1 sm:mb-2">CƠ SỞ VẬT CHẤT</strong>
+                <span class="block">Văn phòng Khoa Kiến trúc, 7 phòng ban, 7 xưởng thực hành kiến trúc, phòng tư liệu phục vụ nghiên cứu và học tập, phòng trưng bày kiến trúc và mỹ thuật.</span>
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- Lịch sử Khoa Kiến trúc -->
-      <section class="about-history">
-        <div class="about-history__container">
-          <h2 class="about-history__title">LỊCH SỬ KHOA KIẾN TRÚC</h2>
-          <div class="about-history__timeline">
+      <section class="bg-gradient-to-b from-gray-50 to-white py-10 sm:py-12 lg:py-16 xl:py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-hau-blue mb-8 sm:mb-10 lg:mb-12 xl:mb-16 uppercase tracking-wide text-left">
+            LỊCH SỬ KHOA KIẾN TRÚC
+          </h2>
+          <div class="space-y-3 sm:space-y-4 lg:space-y-5">
             <div
               v-for="(event, index) in historyEvents"
               :key="index"
-              class="about-history__event"
+              class="group flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-6 xl:gap-8 p-4 sm:p-5 lg:p-6 xl:p-8 bg-white rounded-lg sm:rounded-xl shadow-soft border-l-4 border-hau-blue-dark hover:shadow-medium hover:border-hau-blue transition-all duration-300"
             >
-              <div class="about-history__event-date">{{ event.date }}</div>
-              <div class="about-history__event-description">{{ event.description }}</div>
+              <div class="text-sm sm:text-base lg:text-lg font-bold text-hau-blue-dark flex-shrink-0 sm:min-w-[120px] lg:min-w-[140px] xl:min-w-[160px] leading-tight">
+                {{ event.date }}
+              </div>
+              <div class="text-xs sm:text-sm lg:text-base xl:text-lg leading-relaxed text-gray-700 flex-1">
+                {{ event.description }}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Trưởng Khoa các thời kỳ -->
-      <section class="about-heads">
-        <div class="about-heads__container">
-          <h2 class="about-heads__title">TRƯỞNG KHOA KIẾN TRÚC CÁC THỜI KỲ</h2>
-          <div class="about-heads__grid">
+      <section class="relative bg-gradient-to-b from-gray-700 to-gray-800 py-10 sm:py-12 lg:py-16 xl:py-20 overflow-hidden">
+        <!-- Grid Pattern Background -->
+        <div 
+          class="absolute inset-0 opacity-20 pointer-events-none"
+          style="background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px); background-size: 24px 24px;"
+        ></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10">
+          <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-hau-blue mb-8 sm:mb-10 lg:mb-12 xl:mb-16 uppercase tracking-wide inline-block bg-white px-5 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 rounded-lg sm:rounded-xl shadow-strong">
+            TRƯỞNG KHOA KIẾN TRÚC CÁC THỜI KỲ
+          </h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5 lg:gap-6 xl:gap-8">
             <div
               v-for="(head, index) in facultyHeads"
               :key="index"
-              class="about-heads__item"
+              class="flex flex-col items-center gap-3 sm:gap-4 group"
             >
-              <div class="about-heads__portrait">
+              <div class="w-full aspect-[3/4] rounded-lg sm:rounded-xl overflow-hidden bg-gray-600 shadow-medium group-hover:shadow-strong group-hover:scale-[1.02] transition-all duration-300">
                 <img
                   :src="`/faculty-heads/${head.name.replace(/\s+/g, '-').toLowerCase()}.jpg`"
                   :alt="head.name"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400"
                   loading="lazy"
                   @error="handleImageError"
                 />
               </div>
-              <div class="about-heads__info">
-                <div class="about-heads__name">{{ head.name }}</div>
-                <div class="about-heads__title-text">{{ head.title }}</div>
+              <div class="text-center text-white space-y-1">
+                <div class="text-xs sm:text-sm lg:text-base font-semibold leading-tight">{{ head.name }}</div>
+                <div class="text-[10px] sm:text-xs lg:text-sm text-gray-300 leading-tight">{{ head.title }}</div>
               </div>
             </div>
           </div>
@@ -164,365 +198,3 @@ const handleImageError = (event: Event) => {
     </div>
   </MasterLayout>
 </template>
-
-<style scoped>
-.about-page {
-  width: 100%;
-  background: #ffffff;
-}
-
-/* Header Section - Nền xanh đậm với thanh xanh bên trái */
-.about-header {
-  background: #ffffff;
-  padding: 0;
-  position: relative;
-}
-
-.about-header__container {
-  max-width: 1280px;
-  margin: 0 auto;
-  display: flex;
-  align-items: flex-start;
-  gap: 0;
-  position: relative;
-  min-height: 300px;
-}
-
-/* Thanh xanh đậm bên trái */
-.about-header__container::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 200px;
-  background: #1e3a8a;
-  z-index: 1;
-}
-
-.about-header__logo-section {
-  position: relative;
-  z-index: 2;
-  padding: 3rem 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  width: 200px;
-  flex-shrink: 0;
-}
-
-.about-header__logo-circle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.about-header__logo {
-  width: 120px;
-  height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #ffffff;
-  border-radius: 50%;
-  padding: 1.5rem;
-}
-
-.about-header__logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.about-header__logo-anniversary {
-  text-align: center;
-  color: #ffffff;
-}
-
-.about-header__years {
-  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.about-header__anniversary-text {
-  font-size: clamp(0.85rem, 1vw, 1rem);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.about-header__text {
-  flex: 1;
-  padding: 3rem 3rem 3rem 4rem;
-  position: relative;
-  z-index: 1;
-}
-
-.about-header__university {
-  font-size: clamp(1.5rem, 3vw, 2.2rem);
-  font-weight: 700;
-  color: #1e3a8a;
-  margin: 0 0 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.about-header__faculty {
-  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-  font-weight: 900;
-  color: #1e3a8a;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-/* Intro Section - Nền trắng */
-.about-intro {
-  background: #ffffff;
-  padding: 3rem clamp(2rem, 5vw, 4rem);
-  color: #1f2937;
-}
-
-.about-intro__container {
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-.about-intro__content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.about-intro__paragraph {
-  font-size: clamp(1rem, 1.5vw, 1.2rem);
-  line-height: 1.8;
-  color: #1f2937;
-  margin: 0;
-  text-align: justify;
-}
-
-.about-intro__section-content {
-  font-size: clamp(1rem, 1.5vw, 1.2rem);
-  line-height: 1.8;
-  color: #1f2937;
-  margin: 0;
-  text-align: justify;
-}
-
-.about-intro__section-content strong {
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #1e3a8a;
-}
-
-/* History Section */
-.about-history {
-  background: #f8fafc;
-  padding: 4rem clamp(2rem, 5vw, 4rem);
-}
-
-.about-history__container {
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-.about-history__title {
-  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-  font-weight: 900;
-  color: #1e3a8a;
-  margin: 0 0 3rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  text-align: left;
-}
-
-.about-history__timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.about-history__event {
-  display: flex;
-  gap: 2rem;
-  padding: 1.5rem;
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #1e40af;
-}
-
-.about-history__event-date {
-  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-  font-weight: 700;
-  color: #1e40af;
-  min-width: 120px;
-  flex-shrink: 0;
-}
-
-.about-history__event-description {
-  font-size: clamp(0.95rem, 1.3vw, 1.1rem);
-  line-height: 1.7;
-  color: #374151;
-  flex: 1;
-}
-
-/* Faculty Heads Section */
-.about-heads {
-  background: #374151;
-  padding: 4rem clamp(2rem, 5vw, 4rem);
-  position: relative;
-}
-
-.about-heads::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-  opacity: 0.3;
-  pointer-events: none;
-}
-
-.about-heads__container {
-  max-width: 1280px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-}
-
-.about-heads__title {
-  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-  font-weight: 900;
-  color: #1e3a8a;
-  margin: 0 0 3rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  text-align: left;
-  background: #ffffff;
-  padding: 1rem 2rem;
-  display: inline-block;
-}
-
-.about-heads__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 2rem;
-}
-
-.about-heads__item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.about-heads__portrait {
-  width: 100%;
-  aspect-ratio: 3/4;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #4b5563;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.about-heads__portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.about-heads__info {
-  text-align: center;
-  color: #ffffff;
-}
-
-.about-heads__name {
-  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.about-heads__title-text {
-  font-size: clamp(0.8rem, 1vw, 0.95rem);
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .about-header__container {
-    flex-direction: column;
-  }
-
-  .about-header__container::before {
-    width: 100%;
-    height: 200px;
-  }
-
-  .about-header__logo-section {
-    width: 100%;
-    padding: 2rem;
-  }
-
-  .about-header__text {
-    padding: 2rem 1.5rem;
-  }
-
-  .about-intro {
-    padding: 2rem 1.5rem;
-  }
-
-  .about-history__event {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .about-history__event-date {
-    min-width: auto;
-  }
-
-  .about-heads__title {
-    padding: 0.75rem 1.5rem;
-    font-size: clamp(1.3rem, 2.5vw, 1.8rem);
-  }
-
-  .about-heads__grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .about-header__container::before {
-    height: 180px;
-  }
-
-  .about-header__logo {
-    width: 100px;
-    height: 100px;
-  }
-
-  .about-intro,
-  .about-history,
-  .about-heads {
-    padding: 2.5rem 1rem;
-  }
-
-  .about-heads__grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-}
-</style>
