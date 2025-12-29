@@ -23,6 +23,7 @@ import {
   fetchLatestPostsByCategory,
   fetchSpecialPostsLatest,
   fetchSpecialPostsRandom,
+  fetchPostsByCategory,
   type Post,
 } from '../services/postsService'
 import {
@@ -97,6 +98,10 @@ const bannersError = ref('')
 const collaborationPosts = ref<Post[]>([])
 const isCollaborationLoading = ref(true)
 const collaborationError = ref('')
+
+const productPosts = ref<Post[]>([])
+const isProductLoading = ref(true)
+const productError = ref('')
 
 const loadLatestPosts = async () => {
   isLatestLoading.value = true
@@ -256,6 +261,19 @@ const loadCollaborationPosts = async () => {
   }
 }
 
+const loadProductPosts = async () => {
+  isProductLoading.value = true
+  productError.value = ''
+  try {
+    productPosts.value = await fetchPostsByCategory('san-pham', 1, 5)
+  } catch (error) {
+    productError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm.'
+    productPosts.value = []
+  } finally {
+    isProductLoading.value = false
+  }
+}
+
 const autoSlideDelayMs = 5000
 let autoSlideTimer: ReturnType<typeof setInterval> | null = null
 
@@ -286,6 +304,7 @@ onMounted(() => {
   loadYoutubeVideos(false) // false = không force refresh, chỉ random lại
   loadBanners()
   loadCollaborationPosts()
+  loadProductPosts()
   startVideoAutoRefresh() // Bắt đầu auto refresh sau 10 phút
 })
 
@@ -798,11 +817,23 @@ const investorHighlights = [
           </div>
           <div class="widget">
             <p class="widget-title">Sản phẩm</p>
-            <ul class="investor-list">
-              <li v-for="investor in investorHighlights" :key="investor.name">
-                <h4>{{ investor.name }}</h4>
-                <p>{{ investor.focus }}</p>
-                <span>{{ investor.commitment }}</span>
+            <div v-if="productError" class="section-one__state section-one__state--error">
+              {{ productError }}
+            </div>
+            <div v-else-if="isProductLoading" class="section-one__state">Đang tải...</div>
+            <div v-else-if="!productPosts.length" class="section-one__state">Chưa có dữ liệu.</div>
+            <ul v-else class="collaboration-list">
+              <li v-for="post in productPosts" :key="post.id ?? post.slug ?? post.title">
+                <RouterLink :to="getPostLink(post)" class="collaboration-item">
+                  <img 
+                    v-if="post.thumbnail_url" 
+                    :src="post.thumbnail_url" 
+                    :alt="post.title || 'Sản phẩm'" 
+                    class="collaboration-item__thumb"
+                    loading="lazy"
+                  />
+                  <h4 class="collaboration-item__title">{{ post.title || 'Sản phẩm' }}</h4>
+                </RouterLink>
               </li>
             </ul>
           </div>
