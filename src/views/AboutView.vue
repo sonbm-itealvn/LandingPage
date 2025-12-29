@@ -1,55 +1,55 @@
 <script setup lang="ts">
 import MasterLayout from '../components/MasterLayout.vue'
 
-// Lịch sử Khoa Kiến trúc - Chi tiết theo PDF
+// Lịch sử Khoa Kiến trúc - Chi tiết theo ảnh
 const historyEvents = [
   {
     date: '8.6.1961',
-    description: 'CP Quyết định số 1972.CN cho phép Bộ Kiến trúc mở lớp đào tạo KTS, tiền thân của Khoa Kiến trúc ngày nay. Phó Bộ trưởng KTS Nguyễn Cao Luyện làm trưởng lớp, các giảng viên từ Trường Mỹ thuật Đông Dương.'
+    description: 'CP có Quyết định số 1972.CN, cho phép Bộ Kiến Trúc mở lớp đào tạo KTS - tiền thân của khoa Kiến Trúc ngày nay. Thứ trưởng KTS Nguyễn Cao Luyên kiêm Trưởng ban lãnh đạo lớp và trực tiếp tham gia giảng dạy cùng nhiều KTS, họa sĩ đầu ngành xuất thân từ trường Mỹ thuật Đông Dương.'
   },
   {
     date: '3.9.1961',
-    description: 'Khai giảng khóa 1, sau này trở thành Kiến trúc VI tại Trường Đại học Bách khoa Hà Nội.'
+    description: 'Khai giảng khóa 1, sau đó được phiên chế thành ngành Kiến trúc khóa VI Trường Đại Học Bách khoa Hà Nội.'
   },
   {
     date: '16.10.1963',
-    description: 'Chuyển đào tạo Kiến trúc về Phúc Xá, Ba Đình, Hà Nội.'
+    description: 'lớp đào tạo Kiến trúc sư chuyển về cơ sở Phúc Xá, Ba Đình, Hà Nội.'
   },
   {
     date: '7.6.1967',
-    description: 'CP quyết định sáp nhập lớp Kiến trúc vào Trường Đại học Xây dựng thành Khoa Kiến trúc Đô thị. Học tại Quế Võ (Hà Bắc).'
+    description: 'CP quyết định sáp nhập lớp Kiến trúc sư vào Trường Đại học Xây dựng thành Khoa Kiến trúc Đô thị. Học tập tại Quế Võ (Hà Bắc).'
   },
   {
     date: '17.9.1969',
-    description: 'CP Quyết định 181/CP tách Khoa Kiến trúc Đô thị khỏi Trường Đại học Xây dựng để thành lập Trường Đại học Kiến trúc Hà Nội, tiếp quản cơ sở của Trường Trung cấp Kiến trúc tại Hà Đông. Khoa Kiến trúc chính thức được thành lập, kế thừa và tiếp nối truyền thống đào tạo KTS từ 1961, có 4 Bộ môn: Mỹ thuật, Kiến trúc Dân dụng, Kiến trúc Công nghiệp, Quy hoạch Đô thị & Nông thôn.'
+    description: 'CP có Quyết định 181/CP, tách khoa Kiến trúc Đô thị từ Đại học Xây dựng để thành lập Đại học Kiến trúc, tiếp nhận cơ sở của trường Trung cấp Kiến trúc tại Hà Đồng. Khoa Kiến trúc chính thức được thành lập, kế thừa và tiếp nối truyền thống của các lớp Đào tạo KTS từ 1961, với 4 bộ môn: Mỹ thuật, Kiến trúc dân dụng, Kiến trúc Công nghiệp, Quy hoạch Đô thị & Nông thôn.'
   },
   {
     date: '1969-1972',
-    description: 'Sơ tán tại Vĩnh Phú, Cao Bằng,...'
+    description: 'Sơ tán tại Vĩnh Phú, Cao Bằng....'
   },
   {
     date: '1973-1981',
-    description: 'Chuyển về Xuân Hòa. Thành lập thêm các Bộ môn: Hình học Họa hình (từ 1971) và Cơ bản - Lịch sử Kiến trúc.'
+    description: 'Chuyển về cơ sở Xuân Hòa. Thành lập thêm các bộ môn Hình học Họa hình (từ 1971) và Cơ sở - Lịch sử Kiến trúc.'
   },
   {
     date: '6,1981',
-    description: 'Trường Đại học Kiến trúc Hà Nội trở về địa điểm gốc tại Km10 Nguyễn Trãi, Thanh Xuân, Hà Nội. Khoa Kiến trúc cũng "định cư" tại địa điểm này và liên tục phát triển. Thành lập BM Nhà ở, BM CTCC (tách từ BM Dân dụng - 1981), BM Cấu tạo & trang thiết bị công trình (1997), nay là BM Công nghệ Kiến trúc, BM Lý luận & Bảo tồn (2001).'
+    description: 'Trường Đại học Kiến trúc trở về cơ sở ban đầu tại Km10 đường Nguyễn Trãi, Thanh Xuân, Hà Nội. Khoa Kiến trúc cũng "an cư lạc nghiệp" tại địa điểm này và không ngừng phát triển. Thành lập BM Nhà ở và BM CTCC (tách ra từ BM Dân dụng - 1981), BM Cầu tạo & trang thiết bị công trình (1997) nay là BM Công nghệ Kiến trúc, BM Lý luận & Bảo tồn (2001).'
   },
   {
     date: '1996',
-    description: 'Tách BM Quy hoạch thành lập Khoa Quy hoạch.'
+    description: 'tách BM Quy hoạch để thành lập Khoa Quy hoạch.'
   },
   {
     date: '2005',
-    description: 'Thành lập BM Nội thất, BM Đồ họa và bắt đầu đào tạo chuyên ngành MTCN.'
+    description: 'thành lập các BM Nội thất, Đồ họa và bắt đầu đào tạo các chuyên ngành MTCN.'
   },
   {
     date: '2016',
-    description: 'Tách BM Mỹ thuật và BM Nội ngoại thất thành lập Khoa NT & MTCN.'
+    description: 'tách các BM Mỹ thuật và BM Nội ngoại thất để thành lập Khoa NT & MTCN.'
   },
   {
     date: 'Từ 1996',
-    description: 'Bắt đầu áp dụng mô hình đào tạo KTS theo workshop. Mô hình này đã được cải tiến 2 lần để phù hợp hơn với xu hướng đào tạo KTS trên thế giới. Hiện đang chuẩn bị mở thêm các chuyên ngành: Công nghệ Kiến trúc và Bảo tồn Di sản.'
+    description: 'Bắt đầu áp dụng mô hình đào tạo KTS theo xưởng. Đến nay mô hình này đã qua 2 lần cải tiến để ngày càng phù hợp với xu thế đào tạo KTS trên thế giới. Hiện nay đang chuẩn bị mở thêm các chuyên ngành Công nghệ Kiến trúc và Bảo tồn Di sản.'
   },
 ]
 
@@ -123,55 +123,58 @@ const deans = [
       <!-- Lịch sử Khoa Kiến trúc - Nền trắng -->
       <section class="bg-white py-10 sm:py-12 lg:py-16 xl:py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-          <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-8 sm:mb-10 lg:mb-12 xl:mb-16 uppercase tracking-wide text-left" style="color: #1e3a8a;">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-12 sm:mb-14 lg:mb-16 xl:mb-20 uppercase tracking-wide text-left" style="color: #1e3a8a; margin-bottom: 30px;">
             LỊCH SỬ KHOA KIẾN TRÚC
           </h2>
-          <div class="space-y-3 sm:space-y-4 lg:space-y-5">
-            <div
-              v-for="(event, index) in historyEvents"
-              :key="index"
-              class="group flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-6 xl:gap-8 p-4 sm:p-5 lg:p-6 xl:p-8 bg-white rounded-lg sm:rounded-xl shadow-soft border-l-4 transition-all duration-300 hover:shadow-medium"
-              style="border-color: #1e40af;"
-            >
-              <div class="text-sm sm:text-base lg:text-lg font-bold flex-shrink-0 sm:min-w-[120px] lg:min-w-[140px] xl:min-w-[160px] leading-tight" style="color: #1e40af;">
-                {{ event.date }}
-              </div>
-              <div class="text-xs sm:text-sm lg:text-base xl:text-lg leading-relaxed text-gray-700 flex-1">
-                {{ event.description }}
+          
+          <!-- Timeline -->
+          <div class="relative pl-8 sm:pl-12 md:pl-16 mt-4 sm:mt-6">
+            <!-- Đường thẳng dọc màu xanh -->
+            <div class="absolute left-0 top-0 bottom-0 w-0.5" style="background-color: #1e40af;"></div>
+            
+            <div class="space-y-8 sm:space-y-10 lg:space-y-12">
+              <div
+                v-for="(event, index) in historyEvents"
+                :key="index"
+                class="relative flex flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-8 items-start"
+              >
+                <!-- Điểm nối trên timeline và đường ngang -->
+                <div class="absolute left-0 transform -translate-x-1/2 flex items-center" style="top: 0.25rem;">
+                  <div class="w-3 h-3 rounded-full border-2 border-white" style="background-color: #1e40af;"></div>
+                  <div class="w-4 h-0.5" style="background-color: #1e40af;"></div>
+                </div>
+                
+                <!-- Ngày tháng -->
+                <div class="pl-6 sm:pl-8 sm:w-36 lg:w-44 xl:w-48 flex-shrink-0">
+                  <div class="text-sm sm:text-base lg:text-lg font-bold leading-tight" style="color: #1e40af;">
+                    {{ event.date }}
+                  </div>
+                </div>
+                
+                <!-- Mô tả -->
+                <div class="pl-6 sm:pl-0 flex-1 pb-4 sm:pb-6">
+                  <div class="text-xs sm:text-sm lg:text-base xl:text-lg leading-relaxed text-gray-700">
+                    {{ event.description }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Trưởng Khoa các thời kỳ - Nền xanh đậm -->
-      <section class="relative text-white py-12 sm:py-16 lg:py-20 xl:py-24" style="background-color: #1e3a8a;">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-          <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-3 sm:mb-4 uppercase tracking-wide text-center text-white">
-            TRƯỞNG KHOA KIẾN TRÚC
-          </h2>
-          <p class="text-base sm:text-lg lg:text-xl font-medium text-white/80 text-center mb-10 sm:mb-12 lg:mb-16 uppercase tracking-widest">
-            CÁC THỜI KỲ
-          </p>
-
-          <!-- Grid các Trưởng khoa -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10">
-            <div
-              v-for="(dean, index) in deans"
-              :key="index"
-              class="group flex flex-col items-center text-center"
-            >
-              <div class="w-full aspect-[3/4] bg-slate-600/50 mb-4 rounded-sm overflow-hidden relative">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div class="absolute inset-0 flex items-center justify-center text-white/40 text-xs uppercase tracking-wider">
-                  Ảnh chân dung
-                </div>
-              </div>
-              <p class="font-bold text-sm sm:text-base lg:text-lg text-white leading-tight">{{ dean.name }}</p>
-              <p v-if="dean.period" class="text-xs sm:text-sm text-white/70 mt-1">{{ dean.period }}</p>
-            </div>
+      <!-- Trưởng Khoa các thời kỳ -->
+      <section class="relative w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-10 sm:py-12 lg:py-16 xl:py-20">
+          <h3 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-8 sm:mb-10 lg:mb-12 xl:mb-16 uppercase tracking-wide text-left" style="color: #1e3a8a;">
+            TRƯỞNG KHOA CÁC THỜI KỲ
+          </h3>
           </div>
-        </div>
+        <img
+          src="/z7377350995324_5b0c191f44a7446f4e65ffd29b4b8695.jpg"
+          alt=""
+          class="w-full h-auto object-cover"
+        />
       </section>
 
       <!-- Theo dòng ký ức - Nền trắng -->
@@ -181,53 +184,23 @@ const deans = [
             THEO DÒNG KÝ ỨC
           </h2>
 
-          <div class="space-y-12 sm:space-y-16 lg:space-y-20">
-            <!-- 1969 -->
-            <div class="flex flex-col items-start">
-              <div class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-4" style="color: transparent; -webkit-text-stroke: 2px #334155;">
-                1969
-              </div>
-              <div class="w-full h-48 sm:h-56 md:h-64 lg:h-72 bg-slate-200 rounded-sm relative overflow-hidden group">
-                <div class="absolute inset-0 flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest group-hover:scale-105 transition-transform duration-500">
-                  Hình ảnh tư liệu 1969
-                </div>
-              </div>
+          <div class="space-y-8 sm:space-y-10 lg:space-y-12">
+            <!-- Ảnh 1 -->
+            <div class="w-full rounded-sm overflow-hidden group">
+              <img
+                src="/012.jpg"
+                alt=""
+                class="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+              />
             </div>
 
-            <!-- 1981 -->
-            <div class="flex flex-col items-end">
-              <div class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-4" style="color: transparent; -webkit-text-stroke: 2px #334155;">
-                1981
-              </div>
-              <div class="w-full h-48 sm:h-56 md:h-64 lg:h-72 bg-slate-200 rounded-sm relative overflow-hidden group">
-                <div class="absolute inset-0 flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest group-hover:scale-105 transition-transform duration-500">
-                  Hình ảnh tư liệu 1981
-                </div>
-              </div>
-            </div>
-
-            <!-- 2019 -->
-            <div class="flex flex-col items-start">
-              <div class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-4" style="color: transparent; -webkit-text-stroke: 2px #334155;">
-                2019
-              </div>
-              <div class="w-full h-48 sm:h-56 md:h-64 lg:h-72 bg-slate-200 rounded-sm relative overflow-hidden group">
-                <div class="absolute inset-0 flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest group-hover:scale-105 transition-transform duration-500">
-                  Hình ảnh tư liệu 2019
-                </div>
-              </div>
-            </div>
-
-            <!-- 1991 -->
-            <div class="flex flex-col items-end">
-              <div class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-4" style="color: transparent; -webkit-text-stroke: 2px #334155;">
-                1991
-              </div>
-              <div class="w-full h-48 sm:h-56 md:h-64 lg:h-72 bg-slate-200 rounded-sm relative overflow-hidden group">
-                <div class="absolute inset-0 flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest group-hover:scale-105 transition-transform duration-500">
-                  Hình ảnh tư liệu 1991
-                </div>
-              </div>
+            <!-- Ảnh 2 -->
+            <div class="w-full rounded-sm overflow-hidden group">
+              <img
+                src="/013.jpg"
+                alt=""
+                class="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+              />
             </div>
           </div>
         </div>
