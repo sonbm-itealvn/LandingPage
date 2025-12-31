@@ -18,7 +18,7 @@ const siteNavLinks = [
   { label: 'Giới thiệu', to: '/about' },
   { label: 'Đào tạo', to: '/dao-tao' },
   { label: 'Hoạt động khoa', to: '/hoat-dong-khoa' },
-  { label: 'Hợp tác - Kết nối', to: '/hop-tac-ket-noi', locked: true },
+  { label: 'Hợp tác - Kết nối', to: '/hop-tac-ket-noi' },
   { label: 'Tin tức', to: '/tin-tuc' },
   { label: 'Tạp chí kiến trúc', href: 'https://www.tapchikientruc.com.vn/' },
 ]

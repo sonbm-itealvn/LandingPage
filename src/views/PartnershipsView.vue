@@ -1,84 +1,164 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import MasterLayout from '../components/MasterLayout.vue'
+import {
+  fetchSpecialPostsLatest,
+  fetchPostsByCategory,
+  getPostCategory,
+  getPostExcerpt,
+  getPostDate,
+  getPostImage,
+  type Post,
+} from '../services/postsService'
 
-const partners = [
-  { name: 'LIXIL Việt Nam', type: 'Doanh nghiệp', focus: 'Tài trợ phòng lab vật liệu xanh và học bổng đồ án.' },
-  { name: 'VietCapital Partners', type: 'Đầu tư', focus: 'Đồng hành Digital Hub, hỗ trợ startup từ đồ án.' },
-  { name: 'ENSA Paris-Val de Seine', type: 'Học thuật', focus: 'Studio liên kết, trao đổi sinh viên & giảng viên.' },
-  { name: 'TU Berlin – Habitat Lab', type: 'Nghiên cứu', focus: 'Dự án đô thị thích ứng khí hậu, seminar định kỳ.' },
-]
+const collaborationPosts = ref<Post[]>([])
+const isCollaborationLoading = ref(true)
+const collaborationError = ref('')
 
-const collaborationFlows = [
-  { title: 'Studio hợp tác', note: 'Đồng thiết kế đề bài, mentor song song, review chung với chuyên gia.' },
-  { title: 'Tài trợ & học bổng', note: 'Gói tài trợ lab, học bổng đồ án và giải thưởng triển lãm cuối kỳ.' },
-  { title: 'Nghiên cứu & tư vấn', note: 'Cung cấp dữ liệu, đồng phát triển báo cáo, triển khai thử nghiệm.' },
-]
+const productPosts = ref<Post[]>([])
+const isProductLoading = ref(true)
+const productError = ref('')
 
-const contact = {
-  email: 'partnerships@hau.edu.vn',
-  phone: '024 1234 5678',
-  address: '144 Xuân Thuỷ, Cầu Giấy, Hà Nội',
+const loadCollaborationPosts = async () => {
+  isCollaborationLoading.value = true
+  collaborationError.value = ''
+  try {
+    collaborationPosts.value = await fetchSpecialPostsLatest('hop-tac', 12)
+  } catch (error) {
+    collaborationError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải hợp tác kết nối.'
+    collaborationPosts.value = []
+  } finally {
+    isCollaborationLoading.value = false
+  }
 }
+
+const loadProductPosts = async () => {
+  isProductLoading.value = true
+  productError.value = ''
+  try {
+    productPosts.value = await fetchPostsByCategory('san-pham', 1, 12)
+  } catch (error) {
+    productError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sản phẩm.'
+    productPosts.value = []
+  } finally {
+    isProductLoading.value = false
+  }
+}
+
+const getPostLink = (post: Post) => post.link || (post.id ? `/posts/${post.id}` : post.slug ? `/posts/${post.slug}` : '#')
+
+onMounted(() => {
+  loadCollaborationPosts()
+  loadProductPosts()
+})
 </script>
 
 <template>
   <MasterLayout>
-    <section class="content-hero">
-      <p class="content-hero__eyebrow">Hợp tác - Kết nối</p>
-      <h1>Kết nối doanh nghiệp, viện nghiên cứu và cộng đồng</h1>
-      <p class="content-hero__lede">
-        Chúng tôi mở rộng hợp tác cho studio, tài trợ lab, học bổng và dự án nghiên cứu ứng dụng. Cùng xây dựng thế hệ
-        kiến trúc sư sẵn sàng cho các thách thức mới.
-      </p>
-      <div class="content-hero__tags">
-        <span class="pill">Studio liên kết</span>
-        <span class="pill">Học bổng</span>
-        <span class="pill">R&D</span>
+    <!-- Hero Section -->
+    <section class="partnerships-hero">
+      <div class="partnerships-hero__container">
+        <div class="partnerships-hero__badge">
+          <span>Hợp tác - Kết nối</span>
+        </div>
+        <h1 class="partnerships-hero__title">Kết nối doanh nghiệp, viện nghiên cứu và cộng đồng</h1>
+        <p class="partnerships-hero__lede">
+          Chúng tôi mở rộng hợp tác cho studio, tài trợ lab, học bổng và dự án nghiên cứu ứng dụng. Cùng xây dựng thế hệ
+          kiến trúc sư sẵn sàng cho các thách thức mới.
+        </p>
+        <div class="partnerships-hero__tags">
+          <span class="partnerships-hero__tag">Studio liên kết</span>
+          <span class="partnerships-hero__tag">Học bổng</span>
+          <span class="partnerships-hero__tag">R&D</span>
+        </div>
       </div>
     </section>
 
-    <section class="content-section">
-      <div class="content-section__header">
+    <!-- Hợp tác kết nối Section -->
+    <section class="partnerships-section">
+      <div class="partnerships-section__header">
         <div>
-          <p class="section-tag">Đối tác</p>
-          <h2>Đang đồng hành</h2>
+          <p class="partnerships-section__tag">Hợp tác kết nối</p>
+          <h2 class="partnerships-section__title">Đối tác và chương trình hợp tác</h2>
         </div>
-        <span class="pill">Cập nhật 05/2025</span>
       </div>
-      <div class="content-grid">
-        <article v-for="partner in partners" :key="partner.name" class="content-card">
-          <small>{{ partner.type }}</small>
-          <h3>{{ partner.name }}</h3>
-          <p>{{ partner.focus }}</p>
+
+      <div v-if="collaborationError" class="partnerships-section__state partnerships-section__state--error">
+        {{ collaborationError }}
+      </div>
+      <div v-else-if="isCollaborationLoading" class="partnerships-section__state">Đang tải...</div>
+      <div v-else-if="!collaborationPosts.length" class="partnerships-section__state">Chưa có bài viết.</div>
+      <div v-else class="partnerships-grid">
+        <article
+          v-for="post in collaborationPosts"
+          :key="post.id ?? post.slug ?? post.title"
+          class="partnership-card"
+        >
+          <RouterLink :to="getPostLink(post)" class="partnership-card__link">
+            <div class="partnership-card__thumb">
+              <img :src="getPostImage(post)" :alt="post.title || 'Hợp tác kết nối'" loading="lazy" />
+              <div class="partnership-card__overlay">
+                <span class="partnership-card__category">{{ getPostCategory(post) }}</span>
+              </div>
+            </div>
+            <div class="partnership-card__body">
+              <div class="partnership-card__meta">
+                <span class="partnership-card__date" v-if="getPostDate(post)">
+                  {{ getPostDate(post) }}
+                </span>
+              </div>
+              <h3 class="partnership-card__title">{{ post.title || 'Hợp tác kết nối' }}</h3>
+              <p class="partnership-card__excerpt" v-if="getPostExcerpt(post, 120)">
+                {{ getPostExcerpt(post, 120) }}
+              </p>
+            </div>
+          </RouterLink>
         </article>
       </div>
     </section>
 
-    <section class="content-section">
-      <div class="content-section__header">
+    <!-- Sản phẩm Section -->
+    <section class="partnerships-section partnerships-section--products">
+      <div class="partnerships-section__header">
         <div>
-          <p class="section-tag">Hình thức</p>
-          <h2>Ba cách để hợp tác</h2>
+          <p class="partnerships-section__tag">Sản phẩm</p>
+          <h2 class="partnerships-section__title">Sản phẩm và giải pháp</h2>
         </div>
       </div>
-      <div class="stat-grid">
-        <div v-for="flow in collaborationFlows" :key="flow.title" class="stat-card">
-          <strong>{{ flow.title }}</strong>
-          <span>{{ flow.note }}</span>
-        </div>
-      </div>
-    </section>
 
-    <section class="content-section">
-      <div class="cta-strip">
-        <div>
-          <p class="section-tag">Liên hệ</p>
-          <strong>{{ contact.email }}</strong>
-          <p>{{ contact.phone }} · {{ contact.address }}</p>
-        </div>
-        <a :href="`mailto:${contact.email}`">Đặt cuộc hẹn ↗</a>
+      <div v-if="productError" class="partnerships-section__state partnerships-section__state--error">
+        {{ productError }}
+      </div>
+      <div v-else-if="isProductLoading" class="partnerships-section__state">Đang tải...</div>
+      <div v-else-if="!productPosts.length" class="partnerships-section__state">Chưa có sản phẩm.</div>
+      <div v-else class="partnerships-grid partnerships-grid--products">
+        <article
+          v-for="post in productPosts"
+          :key="post.id ?? post.slug ?? post.title"
+          class="partnership-card partnership-card--product"
+        >
+          <RouterLink :to="getPostLink(post)" class="partnership-card__link">
+            <div class="partnership-card__thumb">
+              <img :src="getPostImage(post)" :alt="post.title || 'Sản phẩm'" loading="lazy" />
+              <div class="partnership-card__overlay">
+                <span class="partnership-card__category">Sản phẩm</span>
+              </div>
+            </div>
+            <div class="partnership-card__body">
+              <div class="partnership-card__meta">
+                <span class="partnership-card__date" v-if="getPostDate(post)">
+                  {{ getPostDate(post) }}
+                </span>
+              </div>
+              <h3 class="partnership-card__title">{{ post.title || 'Sản phẩm' }}</h3>
+              <p class="partnership-card__excerpt" v-if="getPostExcerpt(post, 120)">
+                {{ getPostExcerpt(post, 120) }}
+              </p>
+            </div>
+          </RouterLink>
+        </article>
       </div>
     </section>
   </MasterLayout>
 </template>
-
