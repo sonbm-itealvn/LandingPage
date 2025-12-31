@@ -399,6 +399,11 @@ const isVideoUrl = (url: string): boolean => {
   
   const urlLower = url.toLowerCase()
   
+  // Check for Google Drive video links
+  if (urlLower.includes('drive.google.com') && (urlLower.includes('/file/') || urlLower.includes('/open'))) {
+    return true
+  }
+  
   // Check if URL path contains '/video/' (common in CDN like Cloudinary)
   if (urlLower.includes('/video/')) {
     return true
@@ -416,9 +421,42 @@ const isVideoUrl = (url: string): boolean => {
   return hasVideoExtension || hasVideoKeyword
 }
 
-// Convert Cloudinary video URL to supported format (mp4)
+// Convert video URL to supported format (mp4)
 const convertVideoUrl = (url: string): string => {
   if (!url) return url
+  
+  // Handle Google Drive video links
+  if (url.includes('drive.google.com')) {
+    // Extract file ID from Google Drive URL
+    // Format 1: https://drive.google.com/file/d/FILE_ID/view
+    // Format 2: https://drive.google.com/open?id=FILE_ID
+    // Format 3: https://drive.google.com/drive/folders/FOLDER_ID (folder link - not supported)
+    
+    let fileId = ''
+    
+    // Try to extract from /file/d/FILE_ID/ pattern
+    const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)
+    if (fileMatch && fileMatch[1]) {
+      fileId = fileMatch[1]
+    } else {
+      // Try to extract from ?id=FILE_ID pattern
+      const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+      if (idMatch && idMatch[1]) {
+        fileId = idMatch[1]
+      }
+    }
+    
+    if (fileId) {
+      // Convert to direct download link (requires file to be shared publicly)
+      // Format: https://drive.google.com/uc?export=download&id=FILE_ID
+      // For video playback, use: https://drive.google.com/uc?export=view&id=FILE_ID
+      return `https://drive.google.com/uc?export=view&id=${fileId}`
+    }
+    
+    // If we can't extract file ID, return original URL (will likely fail)
+    return url
+  }
+  
   // If it's a Cloudinary video URL, convert to mp4 format
   if (url.includes('res.cloudinary.com') && url.includes('/video/')) {
     // Cloudinary supports format transformation via URL parameters
@@ -434,6 +472,7 @@ const convertVideoUrl = (url: string): string => {
     // Fallback: just replace extension
     return url.replace(/\.(avi|mov|mkv|wmv|flv|webm)$/i, '.mp4')
   }
+  
   return url
 }
 

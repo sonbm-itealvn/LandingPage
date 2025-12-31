@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
+
+type NavLink = {
+  label: string
+  to?: string
+  href?: string
+  locked?: boolean
+}
+
 const utilityLinks = [
   { label: 'Quảng cáo', href: '#' },
   { label: 'Gửi bài', href: '#' },
@@ -13,7 +21,7 @@ const socialLinks = [
   { label: 'TikTok', href: '#', modifier: 'tiktok' },
 ]
 
-const siteNavLinks = [
+const siteNavLinks: NavLink[] = [
   { label: 'Trang Chủ', to: '/' },
   { label: 'Giới thiệu', to: '/about' },
   { label: 'Đào tạo', to: '/dao-tao' },
