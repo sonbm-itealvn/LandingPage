@@ -389,20 +389,32 @@ html {
 .hero--video {
   padding: 0;
   display: block;
-  min-height: 500px;
-  aspect-ratio: 16 / 9;
+  width: 100%;
+  position: relative;
+}
+
+.hero--image {
+  padding: 0;
+  display: block;
+  width: 100%;
+  position: relative;
 }
 
 .hero-video {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  display: block;
   z-index: 0;
   pointer-events: none;
+  max-width: 100%;
+}
+
+.hero-image {
+  width: 100%;
+  height: auto;
   display: block;
+  z-index: 0;
+  max-width: 100%;
 }
 
 .hero-overlay {
@@ -411,21 +423,30 @@ html {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(17, 24, 39, 0.4), rgba(8, 47, 73, 0.6));
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.5), rgba(8, 47, 73, 0.7));
   z-index: 1;
+  pointer-events: none;
 }
 
 .hero-content {
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 2;
   display: grid;
   gap: 1.25rem;
+  width: 90%;
+  max-width: 800px;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  padding: 1rem;
 }
 
 @media (max-width: 768px) {
-  .hero--video {
-    min-height: 300px;
-    aspect-ratio: 16 / 9;
+  .hero-content {
+    width: 95%;
+    padding: 1rem;
   }
 
   .section-header--dual {

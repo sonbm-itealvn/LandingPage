@@ -391,6 +391,17 @@ const handleVideoError = () => {
   bannerVideoError.value = true
 }
 
+const heroImageLoaded = ref(false)
+const heroVideoLoaded = ref(false)
+
+const handleImageLoaded = (event: Event) => {
+  heroImageLoaded.value = true
+}
+
+const handleVideoLoaded = (event: Event) => {
+  heroVideoLoaded.value = true
+}
+
 const DEFAULT_HERO_IMAGE =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80'
 
@@ -492,15 +503,9 @@ const isVideoBanner = computed(() => {
 })
 
 const heroStyle = computed(() => {
-  // If video failed to load, use image fallback
-  if (isVideoBanner.value && !bannerVideoError.value) {
-    // Remove background image when video is present
-    return {
-      backgroundImage: 'none',
-    }
-  }
+  // Remove background image since we're using img/video tags now
   return {
-    backgroundImage: `linear-gradient(135deg, rgba(17, 24, 39, 0.4), rgba(8, 47, 73, 0.6)), url('${heroImage.value}')`,
+    backgroundImage: 'none',
   }
 })
 
@@ -627,7 +632,7 @@ const investorHighlights = [
 
 <template>
   <MasterLayout>
-    <section class="hero" :class="{ 'hero--video': shouldShowVideo }" :style="heroStyle">
+    <section class="hero" :class="{ 'hero--video': shouldShowVideo, 'hero--image': !shouldShowVideo }" :style="heroStyle">
       <video
         v-if="shouldShowVideo && videoUrl"
         :src="videoUrl || undefined"
@@ -638,34 +643,15 @@ const investorHighlights = [
         preload="auto"
         class="hero-video"
         @error="handleVideoError"
+        @loadedmetadata="handleVideoLoaded"
       ></video>
-      <div v-if="!shouldShowVideo" class="hero-overlay"></div>
-      <div v-if="!shouldShowVideo" class="hero-content">
-        <p class="eyebrow">2025 Studio Showcase</p>
-        <h1>KHOA KIẾN TRÚC</h1>
-        <p class="hero-lede">
-          Cập nhật đồ án, workshop và sự kiện nội bộ của khoa. Khám phá những câu chuyện kiến trúc mới nhất ngay tại
-          campus Hà Nội.
-        </p>
-        <div class="hero-actions">
-          <button class="primary-btn">Truy cập ngay</button>
-          <button class="ghost-btn">Lịch sự kiện</button>
-        </div>
-        <div class="hero-meta">
-          <div>
-            <p>05</p>
-            <span>Workshop tuần này</span>
-          </div>
-          <div>
-            <p>24</p>
-            <span>Đồ án trưng bày</span>
-          </div>
-          <div>
-            <p>08</p>
-            <span>Đối tác quốc tế</span>
-          </div>
-        </div>
-      </div>
+      <img
+        v-if="!shouldShowVideo && heroImage"
+        :src="heroImage"
+        alt="Banner"
+        class="hero-image"
+        @load="handleImageLoaded"
+      />
     </section>
 
     <section id="section-1" class="section-one">
