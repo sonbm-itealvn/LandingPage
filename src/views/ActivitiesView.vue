@@ -224,11 +224,6 @@ const activityPostsByCategory = computed(() => {
     const categorySlug = getPostCategorySlugFromData(post)
     const categoryName = getPostCategoryFromData(post)
     
-    // Skip posts with category "hoat-dong-khoa"
-    if (categorySlug === 'hoat-dong-khoa') {
-      return
-    }
-    
     // Use category slug as key, or fallback to category name
     const key = categorySlug || categoryName || 'other'
     
@@ -548,36 +543,38 @@ const investorHighlights = [
         :id="`section-activity-${categoryKey}`"
         class="activity-section"
       >
-        <header class="section-header">
-          <div>
-            <p class="section-tag">{{ activityPostsByCategory[categoryKey].name }}</p>
+        <template v-if="activityPostsByCategory[categoryKey]">
+          <header class="section-header">
+            <div>
+              <p class="section-tag">{{ activityPostsByCategory[categoryKey]?.name }}</p>
+            </div>
+          </header>
+          <div v-if="!activityPostsByCategory[categoryKey]?.posts.length" class="section-one__state">
+            Chưa có bài viết trong danh mục này.
           </div>
-        </header>
-        <div v-if="!activityPostsByCategory[categoryKey].posts.length" class="section-one__state">
-          Chưa có bài viết trong danh mục này.
-        </div>
-        <div v-else class="activity-grid">
-          <article
-            v-for="post in activityPostsByCategory[categoryKey].posts"
-            :key="post.id ?? post.slug ?? post.title"
-            class="activity-card"
-          >
-            <RouterLink :to="getPostLink(post)" class="activity-card__link">
-              <div class="activity-card__thumb">
-                <img :src="getPostImage(post)" :alt="post.title || activityPostsByCategory[categoryKey].name" loading="lazy" />
-              </div>
-              <div class="activity-card__body">
-                <p class="activity-card__meta">
-                  {{ getPostCategoryFromData(post) }}<span v-if="getPostDate(post)"> · {{ getPostDate(post) }}</span>
-                </p>
-                <h3 class="activity-card__title clamp-2">{{ post.title || activityPostsByCategory[categoryKey].name }}</h3>
-                <p v-if="getPostExcerpt(post, 100)" class="activity-card__excerpt">
-                  {{ getPostExcerpt(post, 100) }}
-                </p>
-              </div>
-            </RouterLink>
-          </article>
-        </div>
+          <div v-else class="activity-grid">
+            <article
+              v-for="post in activityPostsByCategory[categoryKey]?.posts"
+              :key="post.id ?? post.slug ?? post.title"
+              class="activity-card"
+            >
+              <RouterLink :to="getPostLink(post)" class="activity-card__link">
+                <div class="activity-card__thumb">
+                  <img :src="getPostImage(post)" :alt="post.title || activityPostsByCategory[categoryKey]?.name" loading="lazy" />
+                </div>
+                <div class="activity-card__body">
+                  <p class="activity-card__meta">
+                    {{ getPostCategoryFromData(post) }}<span v-if="getPostDate(post)"> · {{ getPostDate(post) }}</span>
+                  </p>
+                  <h3 class="activity-card__title clamp-2">{{ post.title || activityPostsByCategory[categoryKey]?.name }}</h3>
+                  <p v-if="getPostExcerpt(post, 100)" class="activity-card__excerpt">
+                    {{ getPostExcerpt(post, 100) }}
+                  </p>
+                </div>
+              </RouterLink>
+            </article>
+          </div>
+        </template>
       </section>
     </template>
     
