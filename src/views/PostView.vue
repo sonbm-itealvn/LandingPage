@@ -410,7 +410,7 @@ const renderBody = (value?: string) => {
           <div v-else-if="isLoading" class="section-one__state">Đang tải bài viết...</div>
           <div v-else-if="!post" class="section-one__state">Không tìm thấy bài viết.</div>
           <article v-else class="post-detail">
-            <div class="post-detail__body" v-html="renderBody(post.content || post.description || post.summary)"></div>
+            <div class="post-detail__body" v-html="renderBody((post as any).content || post.content || post.description || post.summary)"></div>
           </article>
 
           <!-- Related Posts Section -->

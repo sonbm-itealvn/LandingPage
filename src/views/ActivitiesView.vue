@@ -3,15 +3,6 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import MasterLayout from '../components/MasterLayout.vue'
 import { RouterLink } from 'vue-router'
 import {
-  fetchLatestYoutubeVideos,
-  formatVideoDate,
-  getThumbnail,
-  getVideoChannel,
-  getVideoDescription,
-  getVideoUrl,
-  type YoutubeVideo,
-} from '../services/youtubeService'
-import {
   fetchLatestPosts,
   getPostCategory,
   getPostExcerpt,
@@ -22,6 +13,7 @@ import {
   fetchSpecialPostsLatest,
   fetchSpecialPostsRandom,
   fetchPostsByCategory,
+  fetchPostsByGroup,
   type Post,
 } from '../services/postsService'
 import {
@@ -30,7 +22,6 @@ import {
   formatEventTimeRange,
   type EventItem,
 } from '../services/eventsService'
-import { fetchSandboxByCategory, fetchSandboxLatest, type SandboxPost } from '../services/sandboxService'
 
 const latestPosts = ref<Post[]>([])
 const isLatestLoading = ref(true)
@@ -44,26 +35,19 @@ const highlightPosts = ref<Post[]>([])
 const isHighlightLoading = ref(true)
 const highlightError = ref('')
 
-const announcementPosts = ref<Post[]>([])
-const isAnnouncementsLoading = ref(true)
-const announcementsError = ref('')
+const activityPosts = ref<Post[]>([])
+const isActivityLoading = ref(true)
+const activityError = ref('')
 
 const techPosts = ref<Post[]>([])
 const isTechLoading = ref(true)
 const techError = ref('')
 
-const sandboxRowOne = ref<SandboxPost[]>([])
-const sandboxRowTwo = ref<SandboxPost[]>([])
-const isSandboxLoading = ref(true)
-const sandboxError = ref('')
 
 const referencePosts = ref<Post[]>([])
 const isReferenceLoading = ref(true)
 const referenceError = ref('')
 
-const youtubeVideos = ref<YoutubeVideo[]>([])
-const isVideosLoading = ref(true)
-const videoError = ref('')
 
 const collaborationPosts = ref<Post[]>([])
 const isCollaborationLoading = ref(true)
@@ -99,16 +83,16 @@ const loadHighlightPosts = async () => {
   }
 }
 
-const loadAnnouncements = async () => {
-  isAnnouncementsLoading.value = true
-  announcementsError.value = ''
+const loadActivityPosts = async () => {
+  isActivityLoading.value = true
+  activityError.value = ''
   try {
-    announcementPosts.value = await fetchSpecialPostsLatest('thong-bao', 5)
+    activityPosts.value = await fetchPostsByGroup('hoat-dong-su-kien', 'published')
   } catch (error) {
-    announcementsError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải thông báo.'
-    announcementPosts.value = []
+    activityError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải hoạt động khoa.'
+    activityPosts.value = []
   } finally {
-    isAnnouncementsLoading.value = false
+    isActivityLoading.value = false
   }
 }
 
@@ -125,21 +109,6 @@ const loadTechPosts = async () => {
   }
 }
 
-const loadSandboxPosts = async () => {
-  isSandboxLoading.value = true
-  sandboxError.value = ''
-  try {
-    const [rowOne, rowTwo] = await Promise.all([fetchSandboxLatest(), fetchSandboxByCategory(6)])
-    sandboxRowOne.value = rowOne
-    sandboxRowTwo.value = rowTwo
-  } catch (error) {
-    sandboxError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải sandbox.'
-    sandboxRowOne.value = []
-    sandboxRowTwo.value = []
-  } finally {
-    isSandboxLoading.value = false
-  }
-}
 
 const loadReferencePosts = async () => {
   isReferenceLoading.value = true
@@ -154,17 +123,6 @@ const loadReferencePosts = async () => {
   }
 }
 
-const loadYoutubeVideos = async () => {
-  isVideosLoading.value = true
-  videoError.value = ''
-  try {
-    youtubeVideos.value = await fetchLatestYoutubeVideos()
-  } catch (error) {
-    videoError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải dữ liệu.'
-  } finally {
-    isVideosLoading.value = false
-  }
-}
 
 const loadEvents = async () => {
   isEventsLoading.value = true
@@ -208,12 +166,10 @@ const loadProductPosts = async () => {
 onMounted(() => {
   loadLatestPosts()
   loadHighlightPosts()
-  loadAnnouncements()
+  loadActivityPosts()
   loadEvents()
   loadTechPosts()
-  loadSandboxPosts()
   loadReferencePosts()
-  loadYoutubeVideos()
   loadCollaborationPosts()
   loadProductPosts()
 })
@@ -234,6 +190,65 @@ const latestRest = computed(() => latestPosts.value.slice(1, 5))
 const eventHero = computed(() => events.value[0])
 const showEventSection = computed(() => isEventsLoading.value || events.value.length > 0)
 const highlightColumns = computed(() => [highlightPosts.value.slice(0, 3), highlightPosts.value.slice(3, 6)])
+
+// Helper function to get category from postCategories array
+const getPostCategoryFromData = (post: Post) => {
+  if ((post as any).postCategories && Array.isArray((post as any).postCategories) && (post as any).postCategories.length > 0) {
+    const primaryCategory = (post as any).postCategories.find((pc: any) => pc.is_primary) || (post as any).postCategories[0]
+    if (primaryCategory?.category?.name) {
+      return primaryCategory.category.name
+    }
+    if (primaryCategory?.category?.slug) {
+      return primaryCategory.category.slug
+    }
+  }
+  return getPostCategory(post)
+}
+
+// Helper function to get category slug from postCategories array
+const getPostCategorySlugFromData = (post: Post) => {
+  if ((post as any).postCategories && Array.isArray((post as any).postCategories) && (post as any).postCategories.length > 0) {
+    const primaryCategory = (post as any).postCategories.find((pc: any) => pc.is_primary) || (post as any).postCategories[0]
+    if (primaryCategory?.category?.slug) {
+      return primaryCategory.category.slug
+    }
+  }
+  return null
+}
+
+// Group activity posts by category
+const activityPostsByCategory = computed(() => {
+  const grouped: Record<string, { name: string; posts: Post[] }> = {}
+  
+  activityPosts.value.forEach((post) => {
+    const categorySlug = getPostCategorySlugFromData(post)
+    const categoryName = getPostCategoryFromData(post)
+    
+    // Skip posts with category "hoat-dong-khoa"
+    if (categorySlug === 'hoat-dong-khoa') {
+      return
+    }
+    
+    // Use category slug as key, or fallback to category name
+    const key = categorySlug || categoryName || 'other'
+    
+    if (!grouped[key]) {
+      grouped[key] = {
+        name: categoryName || 'Khác',
+        posts: []
+      }
+    }
+    
+    grouped[key].posts.push(post)
+  })
+  
+  return grouped
+})
+
+// Get sorted category keys for rendering
+const activityCategoryKeys = computed(() => {
+  return Object.keys(activityPostsByCategory.value).sort()
+})
 
 watch(
   () => eventHero.value?.end_time,
@@ -442,12 +457,14 @@ const investorHighlights = [
     </section>
 
     <section id="section-3" class="news-section">
-      <header class="section-header">
-        <div>
+      <header class="section-header section-header--dual">
+        <div class="section-header__left">
           <p class="section-tag">Tin tức</p>
-          <h2>Tin nổi bật</h2>
+          <RouterLink class="see-more-btn" to="/tin-tuc">Xem thêm</RouterLink>
         </div>
-        <RouterLink class="see-more-btn" to="/tin-tuc">Xem thêm</RouterLink>
+        <div class="section-header__right">
+          <p class="section-tag">Hợp tác kết nối</p>
+        </div>
       </header>
       <div class="news-columns">
         <div class="news-stream">
@@ -467,27 +484,11 @@ const investorHighlights = [
                   <img :src="getPostImage(post)" :alt="post.title || getPostCategory(post)" loading="lazy" />
                 </div>
                 <div class="highlight-card__body">
-                  <span class="highlight-card__category">{{ getPostCategory(post) }}</span>
+                  <!-- <span class="highlight-card__category">{{ getPostCategory(post) }}</span> -->
                   <h3 class="highlight-card__title clamp-2">{{ post.title || 'Tin mới' }}</h3>
                 </div>
               </RouterLink>
             </article>
-          </div>
-
-          <div id="faculty-announcements" class="widget widget--stacked announcements-widget">
-            <p class="widget-title">Thông báo</p>
-            <div v-if="announcementsError" class="section-one__state section-one__state--error">
-              {{ announcementsError }}
-            </div>
-            <div v-else-if="isAnnouncementsLoading" class="section-one__state">Đang tải thông báo...</div>
-            <div v-else-if="!announcementPosts.length" class="section-one__state">Chưa có thông báo.</div>
-            <ul v-else>
-              <li v-for="post in announcementPosts" :key="post.id ?? post.slug ?? post.title">
-                <RouterLink :to="getPostLink(post)" class="announcement-item">
-                  <h4>{{ post.title || 'Thông báo mới' }}</h4>
-                </RouterLink>
-              </li>
-            </ul>
           </div>
         </div>
         <aside class="news-side">
@@ -537,7 +538,60 @@ const investorHighlights = [
           </div>
         </aside>
       </div>
+    </section>
 
+    <!-- Hoạt động khoa Sections - Grouped by Category -->
+    <template v-if="!isActivityLoading && !activityError">
+      <section
+        v-for="categoryKey in activityCategoryKeys"
+        :key="categoryKey"
+        :id="`section-activity-${categoryKey}`"
+        class="activity-section"
+      >
+        <header class="section-header">
+          <div>
+            <p class="section-tag">{{ activityPostsByCategory[categoryKey].name }}</p>
+          </div>
+        </header>
+        <div v-if="!activityPostsByCategory[categoryKey].posts.length" class="section-one__state">
+          Chưa có bài viết trong danh mục này.
+        </div>
+        <div v-else class="activity-grid">
+          <article
+            v-for="post in activityPostsByCategory[categoryKey].posts"
+            :key="post.id ?? post.slug ?? post.title"
+            class="activity-card"
+          >
+            <RouterLink :to="getPostLink(post)" class="activity-card__link">
+              <div class="activity-card__thumb">
+                <img :src="getPostImage(post)" :alt="post.title || activityPostsByCategory[categoryKey].name" loading="lazy" />
+              </div>
+              <div class="activity-card__body">
+                <p class="activity-card__meta">
+                  {{ getPostCategoryFromData(post) }}<span v-if="getPostDate(post)"> · {{ getPostDate(post) }}</span>
+                </p>
+                <h3 class="activity-card__title clamp-2">{{ post.title || activityPostsByCategory[categoryKey].name }}</h3>
+                <p v-if="getPostExcerpt(post, 100)" class="activity-card__excerpt">
+                  {{ getPostExcerpt(post, 100) }}
+                </p>
+              </div>
+            </RouterLink>
+          </article>
+        </div>
+      </section>
+    </template>
+    
+    <!-- Loading and Error States -->
+    <section v-if="activityError" class="activity-section">
+      <div class="section-one__state section-one__state--error">
+        {{ activityError }}
+      </div>
+    </section>
+    <section v-else-if="isActivityLoading" class="activity-section">
+      <div class="section-one__state">Đang tải hoạt động khoa...</div>
+    </section>
+    <section v-else-if="activityCategoryKeys.length === 0" class="activity-section">
+      <div class="section-one__state">Chưa có hoạt động nào.</div>
     </section>
 
     <section v-if="isTechLoading || techPosts.length" id="architecture-tech" class="updates-section">
@@ -565,108 +619,6 @@ const investorHighlights = [
           <h3 class="clamp-2">{{ item.title || 'Bài viết' }}</h3>
           <p>{{ getPostShortDescription(item) }}</p>
           <span class="reference-link">Xem chi tiết</span>
-        </article>
-      </div>
-    </section>
-
-    <section id="sandbox-updates" class="sandbox-section">
-      <header class="section-header">
-        <div>
-          <p class="section-tag">Tạp chí kiến trúc</p>
-        </div>
-        <a class="see-more-btn" href="https://www.tapchikientruc.com.vn/" target="_blank" rel="noopener">Xem thêm</a>
-      </header>
-      <div class="sandbox-wrapper">
-        <div v-if="sandboxError" class="section-one__state section-one__state--error">
-          {{ sandboxError }}
-        </div>
-        <div v-else-if="isSandboxLoading" class="section-one__state">Đang tải bài Sandbox...</div>
-        <div v-else-if="!sandboxRowOne.length && !sandboxRowTwo.length" class="section-one__state">Chưa có bài Sandbox.</div>
-        <template v-else>
-          <div class="sandbox-row">
-            <div class="sandbox-grid">
-              <article
-                v-for="post in sandboxRowOne"
-                :key="post.slug ?? post.title"
-                class="sandbox-card"
-              >
-                <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link-wrapper">
-                  <div class="sandbox-card__media">
-                    <img :src="post.image" :alt="post.title" loading="lazy" />
-                  </div>
-                  <div class="sandbox-card__body">
-                    <!-- <p class="sandbox-card__category">Bài mới</p> -->
-                    <h3 class="clamp-2">{{ post.title }}</h3>
-                    <!-- <span class="sandbox-card__link">Đọc bài →</span> -->
-                  </div>
-                </a>
-              </article>
-            </div>
-          </div>
-
-          <div class="sandbox-row">
-            <div class="sandbox-grid">
-              <article
-                v-for="post in sandboxRowTwo"
-                :key="post.slug ?? post.title"
-                class="sandbox-card"
-              >
-                <a :href="post.link" target="_blank" rel="noopener" class="sandbox-card__link-wrapper">
-                  <div class="sandbox-card__media">
-                    <img :src="post.image" :alt="post.title" loading="lazy" />
-                  </div>
-                  <div class="sandbox-card__body">
-                    <!-- <p class="sandbox-card__category">Chuyên mục</p> -->
-                    <h3 class="clamp-2">{{ post.title }}</h3>
-                    <!-- <span class="sandbox-card__link">Đọc bài →</span> -->
-                  </div>
-                </a>
-              </article>
-            </div>
-          </div>
-        </template>
-      </div>
-    </section>
-
-    <section id="workshop" class="workshop-section">
-      <header class="section-header">
-        <div>
-          <p class="section-tag">Đối thoại kiến trúc</p>
-        </div>
-        <a href="https://www.youtube.com/@doithoaikientruc" target="_blank" rel="noopener">Xem kênh</a>
-      </header>
-
-      <div v-if="videoError" class="video-state video-state--error">
-        {{ videoError }}
-      </div>
-      <div v-else-if="isVideosLoading" class="video-state">
-        Đang tải các video mới nhất...
-      </div>
-      <div v-else-if="!youtubeVideos.length" class="video-state">
-        Chưa có video mới, quay lại sau nhé!
-      </div>
-      <div v-else class="video-grid">
-        <article
-          v-for="video in youtubeVideos"
-          :key="video.id ?? video.videoId ?? video.title"
-          class="video-card"
-        >
-          <div class="video-thumb">
-            <img :src="getThumbnail(video)" :alt="video.title || 'Video Đối thoại kiến trúc'" loading="lazy" />
-            <a class="video-play" :href="getVideoUrl(video)" target="_blank" rel="noopener" aria-label="Xem trên YouTube">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </a>
-          </div>
-          <div class="video-body">
-            <p class="video-channel">{{ getVideoChannel(video) }}</p>
-            <h3 class="clamp-2">{{ video.title || 'Video mới' }}</h3>
-            <div class="video-meta">
-              <span>{{ formatVideoDate(video.publishedAt) }}</span>
-              <a :href="getVideoUrl(video)" target="_blank" rel="noopener" class="video-link">Xem ngay</a>
-            </div>
-          </div>
         </article>
       </div>
     </section>

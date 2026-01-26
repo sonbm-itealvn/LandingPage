@@ -94,6 +94,9 @@ const videoError = ref('')
 
 const banners = ref<Banner[]>([])
 const bannersError = ref('')
+const currentBannerIndex = ref(0)
+const isBannerSliding = ref(false)
+let bannerAutoPlayInterval: ReturnType<typeof setInterval> | null = null
 
 const collaborationPosts = ref<Post[]>([])
 const isCollaborationLoading = ref(true)
@@ -242,9 +245,51 @@ const loadBanners = async () => {
   bannersError.value = ''
   try {
     banners.value = await fetchBanners()
+    // Reset to first banner when banners are loaded
+    if (banners.value.length > 0) {
+      currentBannerIndex.value = 0
+      startBannerAutoPlay()
+    }
   } catch (error) {
     bannersError.value = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải banner.'
     banners.value = []
+  }
+}
+
+const goToBannerSlide = (direction: 'prev' | 'next' | number) => {
+  if (isBannerSliding.value || !banners.value.length) return
+  
+  isBannerSliding.value = true
+  
+  if (typeof direction === 'number') {
+    currentBannerIndex.value = direction
+  } else if (direction === 'next') {
+    currentBannerIndex.value = (currentBannerIndex.value + 1) % banners.value.length
+  } else {
+    currentBannerIndex.value = (currentBannerIndex.value - 1 + banners.value.length) % banners.value.length
+  }
+  
+  // Reset video error when changing banner
+  bannerVideoError.value = false
+  
+  setTimeout(() => {
+    isBannerSliding.value = false
+  }, 500)
+}
+
+const startBannerAutoPlay = () => {
+  stopBannerAutoPlay()
+  if (banners.value.length <= 1) return
+  
+  bannerAutoPlayInterval = setInterval(() => {
+    goToBannerSlide('next')
+  }, 5000) // Change slide every 5 seconds
+}
+
+const stopBannerAutoPlay = () => {
+  if (bannerAutoPlayInterval) {
+    clearInterval(bannerAutoPlayInterval)
+    bannerAutoPlayInterval = null
   }
 }
 
@@ -487,7 +532,7 @@ const convertVideoUrl = (url: string): string => {
   return url
 }
 
-const currentBanner = computed(() => banners.value[0])
+const currentBanner = computed(() => banners.value[currentBannerIndex.value] || banners.value[0] || null)
 const bannerUrl = computed(() => {
   if (!currentBanner.value) return null
   return currentBanner.value.image_url || currentBanner.value.image || null
@@ -520,6 +565,37 @@ watch(
     bannerVideoError.value = false
   },
 )
+
+// Pause auto-play on hover
+const onBannerMouseEnter = () => {
+  stopBannerAutoPlay()
+}
+
+const onBannerMouseLeave = () => {
+  startBannerAutoPlay()
+}
+
+// Helper functions for banner processing
+const getBannerUrl = (banner: Banner) => {
+  return banner.image_url || banner.image || null
+}
+
+const isBannerVideo = (banner: Banner) => {
+  const url = getBannerUrl(banner)
+  if (!url) return false
+  return isVideoUrl(url)
+}
+
+const getBannerVideoUrl = (banner: Banner) => {
+  const url = getBannerUrl(banner)
+  if (!url || !isVideoUrl(url)) return null
+  return convertVideoUrl(url)
+}
+
+// Cleanup on unmount
+onBeforeUnmount(() => {
+  stopBannerAutoPlay()
+})
 
 const monthLabels = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12']
 const getEventDay = (event: EventItem) => {
@@ -632,26 +708,134 @@ const investorHighlights = [
 
 <template>
   <MasterLayout>
-    <section class="hero" :class="{ 'hero--video': shouldShowVideo, 'hero--image': !shouldShowVideo }" :style="heroStyle">
-      <video
-        v-if="shouldShowVideo && videoUrl"
-        :src="videoUrl || undefined"
-        autoplay
-        muted
-        loop
-        playsinline
-        preload="auto"
-        class="hero-video"
-        @error="handleVideoError"
-        @loadedmetadata="handleVideoLoaded"
-      ></video>
-      <img
-        v-if="!shouldShowVideo && heroImage"
-        :src="heroImage"
-        alt="Banner"
-        class="hero-image"
-        @load="handleImageLoaded"
-      />
+    <!-- Event Banner Bar - Ngay dưới header -->
+    <section v-if="events.length > 0 && eventHero" class="event-top-banner">
+      <div class="event-top-banner__container">
+        <div class="event-top-banner__content">
+          <div class="event-top-banner__content-wrapper">
+            <div class="event-top-banner__title">
+              <h3>{{ eventHero.name || eventHero.title || 'Sự kiện' }}</h3>
+            </div>
+            <div class="event-top-banner__info">
+              <div class="event-top-banner__info-item" v-if="eventHero.start_time || eventHero.end_time">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.9 1.57h1.52c0-1.93-1.52-3.13-3.42-3.13-1.94 0-3.58 1.04-3.58 2.81 0 1.68 1.26 2.45 2.96 2.95 1.7.5 2.34.95 2.34 1.75 0 .88-.9 1.54-2.2 1.54-1.5 0-2.1-.7-2.1-1.64H7.1c0 2.1 1.6 3.24 3.9 3.24 2.24 0 3.8-1.14 3.8-2.81 0-1.5-1.14-2.25-2.89-2.69z" fill="currentColor"/>
+                </svg>
+                <span>{{ formatEventDateRange(eventHero) }}</span>
+                <span v-if="formatEventTimeRange(eventHero) !== 'Thời gian cập nhật'" class="event-top-banner__time">{{ formatEventTimeRange(eventHero) }}</span>
+              </div>
+              <div class="event-top-banner__info-item" v-if="eventHero.location">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+                </svg>
+                <span>{{ eventHero.location }}</span>
+              </div>
+              <div class="event-top-banner__info-item" v-if="eventHero.content">
+                <span class="event-top-banner__content-text">{{ eventHero.content }}</span>
+              </div>
+            </div>
+            <!-- Duplicate để tạo hiệu ứng seamless -->
+            <div class="event-top-banner__title">
+              <h3>{{ eventHero.name || eventHero.title || 'Sự kiện' }}</h3>
+            </div>
+            <div class="event-top-banner__info">
+              <div class="event-top-banner__info-item" v-if="eventHero.start_time || eventHero.end_time">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.9 1.57h1.52c0-1.93-1.52-3.13-3.42-3.13-1.94 0-3.58 1.04-3.58 2.81 0 1.68 1.26 2.45 2.96 2.95 1.7.5 2.34.95 2.34 1.75 0 .88-.9 1.54-2.2 1.54-1.5 0-2.1-.7-2.1-1.64H7.1c0 2.1 1.6 3.24 3.9 3.24 2.24 0 3.8-1.14 3.8-2.81 0-1.5-1.14-2.25-2.89-2.69z" fill="currentColor"/>
+                </svg>
+                <span>{{ formatEventDateRange(eventHero) }}</span>
+                <span v-if="formatEventTimeRange(eventHero) !== 'Thời gian cập nhật'" class="event-top-banner__time">{{ formatEventTimeRange(eventHero) }}</span>
+              </div>
+              <div class="event-top-banner__info-item" v-if="eventHero.location">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+                </svg>
+                <span>{{ eventHero.location }}</span>
+              </div>
+              <div class="event-top-banner__info-item" v-if="eventHero.content">
+                <span class="event-top-banner__content-text">{{ eventHero.content }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section 
+      class="hero" 
+      :class="{ 'hero--video': shouldShowVideo, 'hero--image': !shouldShowVideo, 'hero--sliding': isBannerSliding }" 
+      :style="heroStyle"
+      @mouseenter="onBannerMouseEnter"
+      @mouseleave="onBannerMouseLeave"
+    >
+      <!-- Navigation Buttons -->
+      <button 
+        v-if="banners.length > 1"
+        class="hero-nav hero-nav--prev"
+        @click="goToBannerSlide('prev')"
+        aria-label="Banner trước"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button 
+        v-if="banners.length > 1"
+        class="hero-nav hero-nav--next"
+        @click="goToBannerSlide('next')"
+        aria-label="Banner tiếp theo"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <!-- Banner Content -->
+      <div class="hero-slide-wrapper">
+        <div 
+          class="hero-slide-container"
+          :style="{ transform: `translateX(-${currentBannerIndex * 100}%)` }"
+        >
+          <div 
+            v-for="(banner, index) in banners" 
+            :key="banner.id || index"
+            class="hero-slide"
+            :class="{ 'hero-slide--active': index === currentBannerIndex }"
+          >
+            <video
+              v-if="isBannerVideo(banner) && getBannerVideoUrl(banner)"
+              :src="getBannerVideoUrl(banner) || undefined"
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="auto"
+              class="hero-video"
+              @error="handleVideoError"
+              @loadedmetadata="handleVideoLoaded"
+            ></video>
+            <img
+              v-else
+              :src="getBannerUrl(banner) || DEFAULT_HERO_IMAGE"
+              :alt="banner.title || 'Banner'"
+              class="hero-image"
+              @load="handleImageLoaded"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Dots Indicator -->
+      <div v-if="banners.length > 1" class="hero-dots">
+        <button
+          v-for="(banner, index) in banners"
+          :key="banner.id || index"
+          class="hero-dot"
+          :class="{ 'hero-dot--active': index === currentBannerIndex }"
+          @click="goToBannerSlide(index)"
+          :aria-label="`Chuyển đến banner ${index + 1}`"
+        ></button>
+      </div>
     </section>
 
     <section id="section-1" class="section-one">

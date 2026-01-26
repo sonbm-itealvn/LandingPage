@@ -254,3 +254,26 @@ export const fetchAllPostsByCategory = async (categorySlug: string, status?: str
   return []
 }
 
+// Fetch all posts by group
+export const fetchPostsByGroup = async (groupSlug: string, status = 'published'): Promise<Post[]> => {
+  const url = `${API_BASE_URL}/posts/group/${groupSlug}/all?status=${status}`
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Không thể tải bài viết từ nhóm ${groupSlug}.`)
+  }
+  const data = await response.json()
+  // Check if response is array directly
+  if (Array.isArray(data)) {
+    return data
+  }
+  // Check if response has 'posts' key
+  if (data && typeof data === 'object' && 'posts' in data && Array.isArray(data.posts)) {
+    return data.posts as Post[]
+  }
+  // Check if response has 'data' key
+  if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
+    return data.data as Post[]
+  }
+  return []
+}
+
