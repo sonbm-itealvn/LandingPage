@@ -215,7 +215,6 @@ html {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  position: relative;
 }
 
 .brand-copy .site-nav {
@@ -4710,10 +4709,11 @@ main section:last-of-type {
 }
 
 /* ============================================
-   MOBILE RESPONSIVE DESIGN (900px and below)
+   MOBILE / TABLET HEADER (<=1200px)
+   Sử dụng menu hamburger + overlay + lớp mờ
    ============================================ */
-@media (max-width: 900px) {
-  /* Utility Bar - Compact trên mobile */
+@media (max-width: 1200px) {
+  /* Utility Bar - ẩn trên mobile / tablet nhỏ */
   .utility-bar {
     display: none; /* Ẩn utility bar trên mobile để tiết kiệm không gian */
   }
@@ -4724,47 +4724,49 @@ main section:last-of-type {
     margin-left: auto;
     z-index: 1001;
     position: relative;
+    order: 2; /* Hiển thị cạnh logo, phía trước ô tìm kiếm */
   }
 
-  /* Mobile Navigation Menu - Full Screen Overlay */
+  /* Ẩn nav trong header, chỉ dùng dạng overlay */
+  .brand-copy .site-nav {
+    display: none;
+  }
+
+  /* Mobile Navigation Menu - Side panel + lớp mờ */
   .site-nav {
     display: none;
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    width: min(80vw, 420px);
+    height: 100vh;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
+    background: #ffffff;
     padding: 0;
     margin: 0;
     border-radius: 0;
-    box-shadow: none;
+    box-shadow: 0 0 30px rgba(15, 23, 42, 0.4);
     flex-direction: column;
     align-items: stretch;
     gap: 0;
     overflow-y: auto;
   }
 
+  .brand-copy .site-nav.site-nav--open,
   .site-nav.site-nav--open {
     display: flex;
   }
 
-  /* Menu Container với background trắng */
-  .site-nav::before {
+  /* Lớp mờ phủ toàn màn hình phía sau panel khi menu mở */
+  .site-nav.site-nav--open::before {
     content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    min-height: 100vh;
-    background: #fff;
-    z-index: 1;
-    padding-top: 5rem;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: -1;
   }
 
-  /* Menu Items */
+  /* Menu Items nằm trong panel trắng bên trái */
   .site-nav > * {
     position: relative;
     z-index: 2;
@@ -4773,6 +4775,7 @@ main section:last-of-type {
     border-bottom: 1px solid #e5e7eb;
     margin: 0;
     width: 100%;
+    max-width: min(60vw, 420px); /* tạo cảm giác side-panel chiếm ~1/2 màn hình */
     text-align: left;
     font-size: 1.05rem;
     font-weight: 600;
@@ -4780,6 +4783,7 @@ main section:last-of-type {
     text-decoration: none;
     transition: all 0.2s ease;
     display: block;
+    align-self: flex-start;
   }
 
   .site-nav > *:first-child {
@@ -4865,7 +4869,7 @@ main section:last-of-type {
 
   /* Search Bar - Full Width Below Brand */
   .header-search {
-    order: 3;
+    order: 3; /* Luôn nằm dưới logo + nút menu trên mobile */
     width: 100%;
     min-width: auto;
     max-width: 100%;

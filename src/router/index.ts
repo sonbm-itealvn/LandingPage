@@ -25,6 +25,11 @@ const router = createRouter({
       component: () => import('../views/ActivitiesView.vue'),
     },
     {
+      path: '/hoat-dong-khoa/:categorySlug',
+      name: 'activities-category',
+      component: () => import('../views/ActivitiesCategoryView.vue'),
+    },
+    {
       path: '/hop-tac-ket-noi',
       name: 'partnerships',
       component: () => import('../views/PartnershipsView.vue'),

@@ -245,6 +245,13 @@ const activityCategoryKeys = computed(() => {
   return Object.keys(activityPostsByCategory.value).sort()
 })
 
+// Helper: lấy tối đa 6 bài cho từng danh mục hoạt động
+const getActivityPostsPreview = (categoryKey: string) => {
+  const category = activityPostsByCategory.value[categoryKey]
+  if (!category || !Array.isArray(category.posts)) return []
+  return category.posts.slice(0, 6)
+}
+
 watch(
   () => eventHero.value?.end_time,
   () => {
@@ -545,8 +552,19 @@ const investorHighlights = [
       >
         <template v-if="activityPostsByCategory[categoryKey]">
           <header class="section-header">
-            <div>
+            <div class="section-header__left">
               <p class="section-tag">{{ activityPostsByCategory[categoryKey]?.name }}</p>
+            </div>
+            <div
+              class="section-header__right"
+              v-if="activityPostsByCategory[categoryKey]?.posts.length > 6"
+            >
+              <RouterLink
+                class="see-more-btn"
+                :to="{ name: 'activities-category', params: { categorySlug: categoryKey } }"
+              >
+                Xem tất cả
+              </RouterLink>
             </div>
           </header>
           <div v-if="!activityPostsByCategory[categoryKey]?.posts.length" class="section-one__state">
@@ -554,7 +572,7 @@ const investorHighlights = [
           </div>
           <div v-else class="activity-grid">
             <article
-              v-for="post in activityPostsByCategory[categoryKey]?.posts"
+              v-for="post in getActivityPostsPreview(categoryKey)"
               :key="post.id ?? post.slug ?? post.title"
               class="activity-card"
             >
